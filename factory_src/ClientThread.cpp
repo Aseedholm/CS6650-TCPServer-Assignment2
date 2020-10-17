@@ -14,22 +14,22 @@ void ClientThreadClass::ThreadBody(std::string ip, int port, int id, int orders,
 		return;
 	}
 	for (int i = 0; i < num_orders; i++) {
-		RobotOrder order;
+		RobotOrder order; //CHANGE TO CUSTOMER REQUEST ***********************************************************
 		RobotInfo robot;
-		order.SetOrder(customer_id, i, robot_type);
+		order.SetOrder(customer_id, i, robot_type); //CHANGE TO CUSTOMER REQUEST ***********************************************************
 
 		timer.Start();
-		robot = stub.OrderRobot(order);
+		robot = stub.OrderRobot(order); //CHANGE TO CUSTOMER REQUEST ***********************************************************
 		timer.EndAndMerge();
 
 		if (!robot.IsValid()) {
 			std::cout << "Invalid robot " << customer_id << std::endl;
-			break;	
-		} 
+			break;
+		}
 	}
 }
 
 ClientTimer ClientThreadClass::GetTimer() {
-	return timer;	
+	return timer;
 }
 

@@ -12,7 +12,16 @@ RobotOrder ServerStub::ReceiveOrder() {
 	if (socket->Recv(buffer, order.Size(), 0)) {
 		order.Unmarshal(buffer);
 	}
-	return order;	
+	return order;
+}
+
+CustomerRequest ServerStub::ReceiveRequest() {
+	char buffer[32];
+	CustomerRequest request;
+	if (socket->Recv(buffer, request.Size(), 0)) {
+		request.Unmarshal(buffer);
+	}
+	return request;
 }
 
 int ServerStub::SendRobot(RobotInfo info) {

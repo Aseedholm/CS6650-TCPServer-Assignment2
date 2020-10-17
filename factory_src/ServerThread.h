@@ -35,8 +35,10 @@ private:
 	std::map<int, int> customer_record;
 	std::vector<MapOp> smr_log;
 
-	RobotInfo CreateRegularRobot(RobotOrder order, int engineer_id);
-	RobotInfo CreateSpecialRobot(RobotOrder order, int engineer_id);
+//	RobotInfo CreateRegularRobot(RobotOrder order, int engineer_id);
+//	RobotInfo CreateSpecialRobot(RobotOrder order, int engineer_id);
+	RobotInfo CreateRegularRobot(CustomerRequest request, int engineer_id);
+	RobotInfo CreateSpecialRobot(CustomerRequest request, int engineer_id);
 public:
 	void EngineerThread(std::unique_ptr<ServerSocket> socket, int id);
 	void ExpertThread(int id);

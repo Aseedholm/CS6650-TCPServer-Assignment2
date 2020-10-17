@@ -4,17 +4,23 @@
 #include "ServerThread.h"
 #include "ServerStub.h"
 
-RobotInfo RobotFactory::CreateRegularRobot(RobotOrder order, int engineer_id) {
+//RobotInfo RobotFactory::CreateRegularRobot(RobotOrder order, int engineer_id) {
+RobotInfo RobotFactory::CreateRegularRobot(CustomerRequest request, int engineer_id) {
 	RobotInfo robot;
-	robot.CopyOrder(order);
+//	robot.CopyOrder(order);
+    robot.CopyRequest(request);
 	robot.SetEngineerId(engineer_id);
-	robot.SetExpertId(-1);
+//	robot.SetExpertId(-1);
+    robot.SetAdminId(-1);
 	return robot;
 }
 
-RobotInfo RobotFactory::CreateSpecialRobot(RobotOrder order, int engineer_id) {
+//RobotInfo RobotFactory::CreateSpecialRobot(RobotOrder order, int engineer_id) {
+RobotInfo RobotFactory::CreateSpecialRobot(CustomerRequest request, int engineer_id) {
 	RobotInfo robot;
-	robot.CopyOrder(order);
+//	robot.CopyOrder(order);
+    robot.CopyRequest(request);
+
 	robot.SetEngineerId(engineer_id);
 
 	std::promise<RobotInfo> prom;
@@ -35,8 +41,13 @@ RobotInfo RobotFactory::CreateSpecialRobot(RobotOrder order, int engineer_id) {
 
 void RobotFactory::EngineerThread(std::unique_ptr<ServerSocket> socket, int id) {
 	int engineer_id = id;
-	int robot_type;
-	RobotOrder order;
+
+//	int robot_type;
+	int request_type;
+//	RobotOrder order;
+    CustomerRequest request;
+
+
 	RobotInfo robot;
 
 	ServerStub stub;
@@ -44,21 +55,39 @@ void RobotFactory::EngineerThread(std::unique_ptr<ServerSocket> socket, int id) 
 	stub.Init(std::move(socket));
 
 	while (true) {
-		order = stub.ReceiveOrder();
-		if (!order.IsValid()) {
+//		order = stub.ReceiveOrder();
+        request = stub.ReceiveRequest();
+//		if (!order.IsValid()) {
+//			break;
+//		}
+		if (!request.IsValid()) {
 			break;
 		}
-		robot_type = order.GetRobotType();
-		switch (robot_type) {
+//		robot_type = order.GetRobotType();
+        request_type = request.GetRequestType();
+
+//		switch (robot_type) {
+//			case 0:
+//				robot = CreateRegularRobot(order, engineer_id);
+//				break;
+//			case 1:
+//				robot = CreateSpecialRobot(order, engineer_id);
+//				break;
+//			default:
+//				std::cout << "Undefined robot type: "
+//					<< robot_type << std::endl;
+//
+//		}
+		switch (request_type) {
 			case 0:
-				robot = CreateRegularRobot(order, engineer_id);
+				robot = CreateRegularRobot(request, engineer_id);
 				break;
 			case 1:
-				robot = CreateSpecialRobot(order, engineer_id);
+				robot = CreateSpecialRobot(request, engineer_id);
 				break;
 			default:
 				std::cout << "Undefined robot type: "
-					<< robot_type << std::endl;
+					<< request_type << std::endl;
 
 		}
 		stub.SendRobot(robot);
@@ -71,7 +100,7 @@ void RobotFactory::ExpertThread(int id) {
 		ul.lock();
 
 		if (erq.empty()) {
-			erq_cv.wait(ul, [this]{ return !erq.empty(); }); //Can be triggered when thread is waked up. 
+			erq_cv.wait(ul, [this]{ return !erq.empty(); }); //Can be triggered when thread is waked up.
 		}
 
 		auto req = std::move(erq.front());
@@ -80,7 +109,8 @@ void RobotFactory::ExpertThread(int id) {
 		ul.unlock();
 
 		std::this_thread::sleep_for(std::chrono::microseconds(100));
-		req->robot.SetExpertId(id);
+//		req->robot.SetExpertId(id);
+        req->robot.SetAdminId(id);
 		req->prom.set_value(req->robot);
 	}
 }
