@@ -154,3 +154,53 @@ void RobotInfo::Print() {
 	std::cout << "expid " << expert_id << std::endl;
 }
 
+
+////***************************** CUSTOMER RECORD *****************************////
+CustomerRecord::CustomerRecord() {
+    customer_id = -1;
+    last_order = -1;
+}
+
+CustomerRecord::CustomerRecord(int customer_id_passed, int last_order_passed) {
+    customer_id = customer_id_passed;
+    last_order = last_order_passed;
+}
+
+void CustomerRecord::setCustomerInformation(int customer_id_passed, int last_order_passed) {
+    customer_id = customer_id_passed;
+    last_order = last_order_passed;
+}
+
+int CustomerRecord::getCustomerId() {
+    return customer_id;
+}
+
+int CustomerRecord::getLastOrder() {
+    return last_order;
+}
+
+void CustomerRecord::Marshal(char *buffer) {
+	int net_customer_id = htonl(customer_id);
+	int net_last_order_number = htonl(last_order);
+	int offset = 0;
+	memcpy(buffer + offset, &net_customer_id, sizeof(net_customer_id));
+	offset += sizeof(net_customer_id);
+	memcpy(buffer + offset, &net_last_order_number, sizeof(net_last_order_number));
+}
+
+void CustomerRecord::Unmarshal(char *buffer) {
+	int net_customer_id;
+	int net_last_order_number;
+	int offset = 0;
+	memcpy(&net_customer_id, buffer + offset, sizeof(net_customer_id));
+	offset += sizeof(net_customer_id);
+	memcpy(&net_last_order_number, buffer + offset, sizeof(net_last_order_number));
+
+	customer_id = ntohl(net_customer_id);
+	last_order = ntohl(net_last_order_number);
+}
+
+int CustomerRecord::Size() {
+	return sizeof(customer_id) + sizeof(last_order);
+}
+////***************************** CUSTOMER RECORD *****************************////

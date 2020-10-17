@@ -13,6 +13,8 @@ public:
 	ClientStub();
 	int Init(std::string ip, int port);
 	RobotInfo OrderRobot(RobotOrder order);
+	//Add method ReadRecord
+    CustomerRecord ReadRecord(RobotOrder order);
 };
 
 

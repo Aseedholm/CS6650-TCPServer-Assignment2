@@ -14,9 +14,25 @@ RobotInfo ClientStub::OrderRobot(RobotOrder order) { /////******************Exac
 	size = order.Size();
 	if (socket.Send(buffer, size, 0)) { //if send succeeds return 1, 0.
 		size = info.Size();
-		if (socket.Recv(buffer, size, 0)) { 
+		if (socket.Recv(buffer, size, 0)) {
 			info.Unmarshal(buffer);
 		}
 	}
 	return info;
+}
+
+
+CustomerRecord ClientStub::ReadRecord(RobotOrder order) {
+    CustomerRecord recordToReturn;
+    char buffer[32];
+    int size;
+    order.Marshal(buffer);
+    size = order.Size();
+    if (socket.Send(buffer, size, 0)) {
+        size = recordToReturn.Size();
+        if(socket.Recv(buffer, size, 0)) {
+            recordToReturn.Unmarshal(buffer);
+        }
+    }
+    return recordToReturn;
 }

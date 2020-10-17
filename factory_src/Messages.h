@@ -69,4 +69,20 @@ public:
 	void Print();
 };
 
+class CustomerRecord {
+private:
+    int customer_id;
+    int last_order;
+public:
+    CustomerRecord();
+    CustomerRecord(int customer_id_passed, int last_order_passed);
+    void setCustomerInformation(int customer_id_passed, int last_order_passed);
+    int getCustomerId();
+    int getLastOrder();
+    void Marshal(char *buffer);
+	void Unmarshal(char *buffer);
+	int Size();
+
+};
+
 #endif // #ifndef __MESSAGES_H__
