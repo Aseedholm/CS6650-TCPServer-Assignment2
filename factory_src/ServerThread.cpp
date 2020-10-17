@@ -78,6 +78,7 @@ void RobotFactory::EngineerThread(std::unique_ptr<ServerSocket> socket, int id) 
 //					<< robot_type << std::endl;
 //
 //		}
+        request.Print();
 		switch (request_type) {
 			case 0:
 				robot = CreateRegularRobot(request, engineer_id);

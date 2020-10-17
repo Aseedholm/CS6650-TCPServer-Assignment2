@@ -12,9 +12,10 @@ private:
 public:
 	ClientStub();
 	int Init(std::string ip, int port);
-	RobotInfo OrderRobot(RobotOrder order);
+//	RobotInfo OrderRobot(RobotOrder order);
+    RobotInfo OrderRobot(CustomerRequest request);
 	//Add method ReadRecord
-    CustomerRecord ReadRecord(RobotOrder order);
+    CustomerRecord ReadRecord(CustomerRequest request);
 };
 
 

@@ -173,7 +173,7 @@ bool CustomerRequest::IsValid() {
 void CustomerRequest::Print() {
 	std::cout << "id " << customer_id << " ";
 	std::cout << "num " << order_number << " ";
-	std::cout << "type " << request_type << std::endl;
+	std::cout << "Request Type " << request_type << std::endl;
 }
 ////***************************** CUSTOMER REQUEST *****************************////
 
@@ -282,8 +282,8 @@ bool RobotInfo::IsValid() {
 void RobotInfo::Print() {
 	std::cout << "id " << customer_id << " ";
 	std::cout << "num " << order_number << " ";
-	std::cout << "type " << request_type << " ";
+	std::cout << "Request Type " << request_type << " ";
 	std::cout << "engid " << engineer_id << " ";
-	std::cout << "expid " << admin_id << std::endl;
+	std::cout << "Admin ID " << admin_id << std::endl;
 }
 //// ROBOT Info ********************************************************
