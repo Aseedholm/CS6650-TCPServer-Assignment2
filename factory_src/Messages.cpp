@@ -115,6 +115,11 @@ void CustomerRecord::Unmarshal(char *buffer) {
 int CustomerRecord::Size() {
 	return sizeof(customer_id) + sizeof(last_order);
 }
+
+void CustomerRecord::Print() {
+	std::cout << "Customer ID (RECORD): " << customer_id << " ";
+	std::cout << "LAST ORDER (RECORD): " << last_order << std::endl;
+}
 ////***************************** CUSTOMER RECORD *****************************////
 
 ////***************************** CUSTOMER REQUEST *****************************////

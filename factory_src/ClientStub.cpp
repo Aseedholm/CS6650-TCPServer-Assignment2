@@ -25,7 +25,7 @@ RobotInfo ClientStub::OrderRobot(CustomerRequest request) {
 
 CustomerRecord ClientStub::ReadRecord(CustomerRequest request) {
     CustomerRecord recordToReturn;
-    char buffer[32];
+    char buffer[20];
     int size;
     request.Marshal(buffer);
     size = request.Size();

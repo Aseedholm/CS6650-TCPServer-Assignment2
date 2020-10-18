@@ -47,6 +47,7 @@ private:
 	RobotInfo CreateRegularRobot(CustomerRequest request, int engineer_id);
 	RobotInfo CreateSpecialRobot(CustomerRequest request, int engineer_id);
     RobotInfo CreateRobotWithAdmin(CustomerRequest request, int engineer_id);
+    CustomerRecord GetCustomerRecord(CustomerRequest request);
 public:
 	void EngineerThread(std::unique_ptr<ServerSocket> socket, int id);
 	void AdminThread(int id);

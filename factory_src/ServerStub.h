@@ -17,7 +17,8 @@ public:
 
 	int SendRobot(RobotInfo info);
 
-	CustomerRecord ReturnRecord(CustomerRecord record);
+	int ReturnRecord(CustomerRecord record);
+
 };
 
 #endif // end of #ifndef __SERVER_STUB_H__

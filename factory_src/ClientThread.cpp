@@ -19,13 +19,32 @@ void ClientThreadClass::ThreadBody(std::string ip, int port, int id, int orders,
 		CustomerRequest request;
 
 		RobotInfo robot;
+		CustomerRecord record;
 //		order.SetOrder(customer_id, i, robot_type); //CHANGE TO CUSTOMER REQUEST ***********************************************************
         request.SetRequest(customer_id, i, request_type);
 
 		timer.Start();
 //		robot = stub.OrderRobot(order); //CHANGE TO CUSTOMER REQUEST ***********************************************************
-        robot = stub.OrderRobot(request);
-		robot.Print();
+		switch (request_type) {
+			case 1:
+				robot = stub.OrderRobot(request);
+                robot.Print();
+				break;
+			case 2:
+				//Customer record reading
+                record = stub.ReadRecord(request);
+                record.Print();
+				break;
+            case 3:
+                //All customer records.
+                break;
+			default:
+				std::cout << "Undefined request type "
+					<< request_type << std::endl;
+
+		}
+
+
 		timer.EndAndMerge();
 
 		if (!robot.IsValid()) {

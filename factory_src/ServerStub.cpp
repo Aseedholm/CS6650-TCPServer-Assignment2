@@ -30,3 +30,8 @@ int ServerStub::SendRobot(RobotInfo info) {
 	return socket->Send(buffer, info.Size(), 0);
 }
 
+int ServerStub::ReturnRecord(CustomerRecord record) {
+	char buffer[32];
+	record.Marshal(buffer);
+	return socket->Send(buffer, record.Size(), 0);
+}

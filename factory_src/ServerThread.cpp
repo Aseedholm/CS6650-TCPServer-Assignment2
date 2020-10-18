@@ -28,7 +28,7 @@ RobotInfo RobotFactory::CreateSpecialRobot(CustomerRequest request, int engineer
 	std::future<RobotInfo> fut = prom.get_future();
 
 	std::unique_ptr<ExpertRequest> req = std::unique_ptr<ExpertRequest>(new ExpertRequest);
-	req->robot = robot;
+            req->robot = robot;
 	req->prom = std::move(prom);
 
 	erq_lock.lock();
@@ -73,6 +73,7 @@ void RobotFactory::EngineerThread(std::unique_ptr<ServerSocket> socket, int id) 
 
 
 	RobotInfo robot;
+    CustomerRecord record;
 
 	ServerStub stub;
 
@@ -104,22 +105,27 @@ void RobotFactory::EngineerThread(std::unique_ptr<ServerSocket> socket, int id) 
 //		}
         request.Print();
 		switch (request_type) {
-			case 0:
-				robot = CreateRegularRobot(request, engineer_id);
-				break;
 			case 1:
-				robot = CreateSpecialRobot(request, engineer_id);
-				break;
-            case 2:
                 robot = CreateRobotWithAdmin(request, engineer_id);
-                std::cout << "CUSTOMER MAP RECORD: " << customer_record.find(request.GetCustomerId())->second << std::endl;
+//                std::cout << "CUSTOMER MAP RECORD: " << customer_record.find(request.GetCustomerId())->second << std::endl;
+                stub.SendRobot(robot);
+				break;
+			case 2:
+                //Get customer record request
+                record = GetCustomerRecord(request);
+//                std::cout << "CUSTOMER RECORD BEING RETURNED: " << std::endl;
+//                record.Print();
+                stub.ReturnRecord(record);
+				break;
+            case 3:
+                //Get all customer recrods.
                 break;
 			default:
 				std::cout << "Undefined robot type: "
 					<< request_type << std::endl;
 
 		}
-		stub.SendRobot(robot);
+//		stub.SendRobot(robot);
 	}
 }
 
@@ -180,4 +186,12 @@ void RobotFactory::ExpertThread(int id) {
         req->robot.SetAdminId(id);
 		req->prom.set_value(req->robot);
 	}
+}
+
+CustomerRecord RobotFactory::GetCustomerRecord(CustomerRequest request) {
+    CustomerRecord recordToReturn;
+    int customer_id_return = request.GetCustomerId();
+    int last_order_return = customer_record.find(customer_id_return)->second;
+    recordToReturn.setCustomerInformation(customer_id_return, last_order_return);
+    return recordToReturn;
 }

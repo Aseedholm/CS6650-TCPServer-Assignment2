@@ -46,6 +46,7 @@ public:
     void Marshal(char *buffer);
 	void Unmarshal(char *buffer);
 	int Size();
+    void Print();
 
 };
 ////////////////////////////CUSTOMER RECORD//////////////////////

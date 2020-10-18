@@ -48,6 +48,7 @@ int Socket::Send(char *buffer, int size, int flags) { ///MARSHALLS SOME DATA AND
 }
 
 int Socket::Recv(char *buffer, int size, int flags) { ///UNMARSHALLS SOME DATA AND RECEIVES IT? NOT UMARSHALLING ALL AT ONCE?
+
 	int bytes_read = 0;
 	int offset = 0;
 	while (size > 0) {
@@ -69,6 +70,7 @@ int Socket::Recv(char *buffer, int size, int flags) { ///UNMARSHALLS SOME DATA A
 		offset += bytes_read;
 		assert(size >= 0);
 	}
+//	   std::cout << "RECEIVE " << std::endl;
 	return 1;
 }
 
