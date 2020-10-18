@@ -145,7 +145,13 @@ void RobotFactory::AdminThread(int id) {
         smr_log.push_back(customerRequestLog);
 
 		//Update map with log request
-        customer_record.insert(std::pair<int,int>(customerRequestLog.arg1, customerRequestLog.arg2));
+		if(customer_record.count(customerRequestLog.arg1) < 0) {
+            customer_record.insert(std::pair<int,int>(customerRequestLog.arg1, customerRequestLog.arg2));
+		} else {
+		    customer_record.erase(customerRequestLog.arg1);
+            customer_record.insert(std::pair<int,int>(customerRequestLog.arg1, customerRequestLog.arg2));
+		}
+
 
 		ul.unlock();
 
