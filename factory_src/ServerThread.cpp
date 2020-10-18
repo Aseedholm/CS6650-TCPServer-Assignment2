@@ -11,6 +11,7 @@ RobotInfo RobotFactory::CreateRegularRobot(CustomerRequest request, int engineer
     robot.CopyRequest(request);
 	robot.SetEngineerId(engineer_id);
 //	robot.SetExpertId(-1);
+    //Engineer will now request the admin to update the customer record and waits
     robot.SetAdminId(-1);
 	return robot;
 }
@@ -34,6 +35,29 @@ RobotInfo RobotFactory::CreateSpecialRobot(CustomerRequest request, int engineer
 	erq.push(std::move(req));
 	erq_cv.notify_one();
 	erq_lock.unlock();
+
+	robot = fut.get();
+	return robot;
+}
+
+RobotInfo RobotFactory::CreateRobotWithAdmin(CustomerRequest request, int engineer_id) {
+	RobotInfo robot;
+//	robot.CopyOrder(order);
+    robot.CopyRequest(request);
+
+	robot.SetEngineerId(engineer_id);
+
+	std::promise<RobotInfo> prom;
+	std::future<RobotInfo> fut = prom.get_future();
+
+	std::unique_ptr<AdminRequest> req = std::unique_ptr<AdminRequest>(new AdminRequest);
+	req->robot = robot;
+	req->prom = std::move(prom);
+
+	admin_req_lock.lock();
+	adminRequestQueue.push(std::move(req));
+	admin_req_cv.notify_one();
+	admin_req_lock.unlock();
 
 	robot = fut.get();
 	return robot;
@@ -86,12 +110,47 @@ void RobotFactory::EngineerThread(std::unique_ptr<ServerSocket> socket, int id) 
 			case 1:
 				robot = CreateSpecialRobot(request, engineer_id);
 				break;
+            case 2:
+                robot = CreateRobotWithAdmin(request, engineer_id);
+                std::cout << "CUSTOMER MAP RECORD: " << customer_record.find(request.GetCustomerId())->second << std::endl;
+                break;
 			default:
 				std::cout << "Undefined robot type: "
 					<< request_type << std::endl;
 
 		}
 		stub.SendRobot(robot);
+	}
+}
+
+void RobotFactory::AdminThread(int id) {
+	std::unique_lock<std::mutex> ul(admin_req_lock, std::defer_lock);
+	while (true) {
+		ul.lock();
+
+		if (adminRequestQueue.empty()) {
+			admin_req_cv.wait(ul, [this]{ return !adminRequestQueue.empty(); }); //Can be triggered when thread is waked up.
+		}
+
+		auto adminRequest = std::move(adminRequestQueue.front());
+		adminRequestQueue.pop();
+
+        //Create MapOp struct
+
+		MapOp customerRequestLog;
+		customerRequestLog.opcode = 1;
+		customerRequestLog.arg1 = adminRequest->robot.GetCustomerId();
+		customerRequestLog.arg2 = adminRequest->robot.GetOrderNumber();
+		//Add struct to log
+        smr_log.push_back(customerRequestLog);
+
+		//Update map with log request
+        customer_record.insert(std::pair<int,int>(customerRequestLog.arg1, customerRequestLog.arg2));
+
+		ul.unlock();
+
+        adminRequest->robot.SetAdminId(id);
+		adminRequest->prom.set_value(adminRequest->robot);
 	}
 }
 
@@ -106,6 +165,7 @@ void RobotFactory::ExpertThread(int id) {
 
 		auto req = std::move(erq.front());
 		erq.pop();
+
 
 		ul.unlock();
 

@@ -17,6 +17,11 @@ struct ExpertRequest {
 	std::promise<RobotInfo> prom;
 };
 
+struct AdminRequest {
+    RobotInfo robot;
+    std::promise<RobotInfo> prom;
+};
+
 
 struct MapOp {
     int opcode;
@@ -31,7 +36,9 @@ private:
 	std::mutex erq_lock;
 	std::condition_variable erq_cv;
 
-    std::queue<std::unique_ptr<MapOp>> adminRequestQueue;
+    std::queue<std::unique_ptr<AdminRequest>> adminRequestQueue;
+    std::mutex admin_req_lock;
+    std::condition_variable admin_req_cv;
 	std::map<int, int> customer_record;
 	std::vector<MapOp> smr_log;
 
@@ -39,8 +46,10 @@ private:
 //	RobotInfo CreateSpecialRobot(RobotOrder order, int engineer_id);
 	RobotInfo CreateRegularRobot(CustomerRequest request, int engineer_id);
 	RobotInfo CreateSpecialRobot(CustomerRequest request, int engineer_id);
+    RobotInfo CreateRobotWithAdmin(CustomerRequest request, int engineer_id);
 public:
 	void EngineerThread(std::unique_ptr<ServerSocket> socket, int id);
+	void AdminThread(int id);
 	void ExpertThread(int id);
 };
 

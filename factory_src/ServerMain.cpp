@@ -12,9 +12,10 @@ int main(int argc, char *argv[]) {
 	int engineer_cnt = 0;
 	int num_experts;
 	ServerSocket socket;
-	RobotFactory factory; //Only one factory used -> This is because factory stores teh shared queue and this makes it availabel to ALL THREADS. 
+	RobotFactory factory; //Only one factory used -> This is because factory stores teh shared queue and this makes it availabel to ALL THREADS.
 	std::unique_ptr<ServerSocket> new_socket; //Return socket from accept. --> Unique Pointer being sent into thread. Making it explicit that there is only 1 owner for this thread.
 	std::vector<std::thread> thread_vector; //
+//	std::vector<std::thread> admin_vector;
 
 	if (argc < 3) {
 		std::cout << "not enough arguments" << std::endl;
@@ -29,6 +30,12 @@ int main(int argc, char *argv[]) {
 		std::thread expert_thread(&RobotFactory::ExpertThread, &factory, engineer_cnt++);
 		thread_vector.push_back(std::move(expert_thread));
 	}
+
+	//CREATE ADMIN THREAD WILL ONLY BE 1
+	std::thread admin_thread(&RobotFactory::AdminThread, &factory, engineer_cnt++);
+    thread_vector.push_back(std::move(admin_thread));
+    //CREATE ADMIN THREAD WILL ONLY BE 1
+
 
 	if (!socket.Init(port)) {
 		std::cout << "Socket initialization failed" << std::endl;
