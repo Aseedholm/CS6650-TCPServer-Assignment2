@@ -154,8 +154,11 @@ void RobotFactory::AdminThread(int id) {
 		if(customer_record.count(customerRequestLog.arg1) < 0) {
             customer_record.insert(std::pair<int,int>(customerRequestLog.arg1, customerRequestLog.arg2));
 		} else {
-		    customer_record.erase(customerRequestLog.arg1);
+//		    if (customerRequestLog.arg2 > customer_record.find(customerRequestLog.arg1)->second) { //THIS LOGIC IS IN PLACE BECAUSE IF WE DO CUST-1, ORDER-1, REQUEST-1 |||| then CUST-1, ORDER-2, REQUEST-1 ||| THEN CUST-1, ORDER-1, REQUEST-1 it will update customer_record to have the last order as 1.
+            customer_record.erase(customerRequestLog.arg1);
             customer_record.insert(std::pair<int,int>(customerRequestLog.arg1, customerRequestLog.arg2));
+//		    }
+
 		}
 
 
@@ -191,7 +194,14 @@ void RobotFactory::ExpertThread(int id) {
 CustomerRecord RobotFactory::GetCustomerRecord(CustomerRequest request) {
     CustomerRecord recordToReturn;
     int customer_id_return = request.GetCustomerId();
-    int last_order_return = customer_record.find(customer_id_return)->second;
-    recordToReturn.setCustomerInformation(customer_id_return, last_order_return);
-    return recordToReturn;
+
+    if (customer_record.count(customer_id_return) > 0) {
+        int last_order_return = customer_record.find(customer_id_return)->second;
+        recordToReturn.setCustomerInformation(customer_id_return, last_order_return);
+        return recordToReturn;
+    } else {
+        recordToReturn.setCustomerInformation(-1, -1);
+        return recordToReturn;
+    }
+
 }

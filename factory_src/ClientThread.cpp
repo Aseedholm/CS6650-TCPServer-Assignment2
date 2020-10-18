@@ -14,6 +14,20 @@ void ClientThreadClass::ThreadBody(std::string ip, int port, int id, int orders,
 		std::cout << "Thread " << customer_id << " failed to connect" << std::endl;
 		return;
 	}
+
+	if (request_type == 2) {
+        CustomerRequest request;
+
+		RobotInfo robot;
+		CustomerRecord record;
+//		order.SetOrder(customer_id, i, robot_type); //CHANGE TO CUSTOMER REQUEST ***********************************************************
+        request.SetRequest(customer_id, -1, request_type);
+
+        record = stub.ReadRecord(request);
+        record.Print();
+	} else {
+
+
 	for (int i = 0; i < num_orders; i++) {
 //		RobotOrder order; //CHANGE TO CUSTOMER REQUEST ***********************************************************
 		CustomerRequest request;
@@ -31,9 +45,9 @@ void ClientThreadClass::ThreadBody(std::string ip, int port, int id, int orders,
                 robot.Print();
 				break;
 			case 2:
-				//Customer record reading
-                record = stub.ReadRecord(request);
-                record.Print();
+////				//Customer record reading
+//                record = stub.ReadRecord(request);
+//                record.Print();
 				break;
             case 3:
                 //All customer records.
@@ -52,6 +66,7 @@ void ClientThreadClass::ThreadBody(std::string ip, int port, int id, int orders,
 			break;
 		}
 	}
+	} // END OF ELSE FOR IF request_type == 2
 }
 
 ClientTimer ClientThreadClass::GetTimer() {
