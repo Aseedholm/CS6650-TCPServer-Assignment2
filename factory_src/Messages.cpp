@@ -117,8 +117,9 @@ int CustomerRecord::Size() {
 }
 
 void CustomerRecord::Print() {
-	std::cout << "Customer ID (RECORD): " << customer_id << " ";
-	std::cout << "LAST ORDER (RECORD): " << last_order << std::endl;
+//	std::cout << "Customer ID (RECORD): " << customer_id << " ";
+//	std::cout << "LAST ORDER (RECORD): " << last_order << std::endl;
+	std::cout << "customer_id: " << customer_id << "\t" << "last_order: " << last_order << std::endl;
 }
 ////***************************** CUSTOMER RECORD *****************************////
 

@@ -61,6 +61,13 @@ int main(int argc, char *argv[]) {
 				ip, port, num_customers, num_orders, robot_type); //Change to request_type ************************************************************
 		client_vector.push_back(std::move(client_cls));
 		thread_vector.push_back(std::move(client_thread));
+	} else if (robot_type == 3) {
+	    std::cout << "NUMBER OF ORDERS IN CLIETN MAIN: " << num_orders << std::endl;
+        auto client_cls = std::shared_ptr<ClientThreadClass>(new ClientThreadClass());
+		std::thread client_thread(&ClientThreadClass::ThreadBody, client_cls,
+				ip, port, 1, num_orders, robot_type); //Change to request_type ************************************************************
+		client_vector.push_back(std::move(client_cls));
+		thread_vector.push_back(std::move(client_thread));
 	}
 
 

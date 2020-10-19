@@ -118,10 +118,19 @@ void RobotFactory::EngineerThread(std::unique_ptr<ServerSocket> socket, int id) 
                 stub.ReturnRecord(record);
 				break;
             case 3:
-                //Get all customer recrods.
+                record = GetCustomerRecord(request);
+//                //Get all customer recrods.
+//                for (int i = 0; i < request.GetOrderNumber(); i++) {
+//                    request.SetRequest(i, request.GetOrderNumber(), request.GetRequestType());
+//                    record = GetCustomerRecord(request);
+////                std::cout << "CUSTOMER RECORD BEING RETURNED: " << std::endl;
+////                record.Print();
+//                    stub.ReturnRecord(record);
+//                }
+                stub.ReturnRecord(record);
                 break;
 			default:
-				std::cout << "Undefined robot type: "
+				std::cout << "Undefined request type (Server): "
 					<< request_type << std::endl;
 
 		}
@@ -191,8 +200,9 @@ void RobotFactory::ExpertThread(int id) {
 	}
 }
 
-CustomerRecord RobotFactory::GetCustomerRecord(CustomerRequest request) {
+CustomerRecord RobotFactory::GetCustomerRecord(CustomerRequest request) { // MAY NEED TO ADD A LOCK / UNLOCK HERE. POSSIBLE RACE CONDITIONS?
     CustomerRecord recordToReturn;
+//    admin_req_lock.lock();
     int customer_id_return = request.GetCustomerId();
 
     if (customer_record.count(customer_id_return) > 0) {
@@ -203,5 +213,6 @@ CustomerRecord RobotFactory::GetCustomerRecord(CustomerRequest request) {
         recordToReturn.setCustomerInformation(-1, -1);
         return recordToReturn;
     }
+//    admin_req_lock.unlock();
 
 }
