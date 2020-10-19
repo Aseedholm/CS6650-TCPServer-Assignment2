@@ -42,6 +42,8 @@ private:
 	std::map<int, int> customer_record;
 	std::vector<MapOp> smr_log;
 
+	bool notWriting = false;
+
 //	RobotInfo CreateRegularRobot(RobotOrder order, int engineer_id);
 //	RobotInfo CreateSpecialRobot(RobotOrder order, int engineer_id);
 	RobotInfo CreateRegularRobot(CustomerRequest request, int engineer_id);

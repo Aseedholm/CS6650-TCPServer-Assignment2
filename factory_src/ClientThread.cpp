@@ -54,7 +54,10 @@ void ClientThreadClass::ThreadBody(std::string ip, int port, int id, int orders,
                     request.SetRequest(i, -1, request_type);
 
                     record = stub.ReadRecord(request);
-                    record.Print();
+                    if (record.getCustomerId() != -1) {
+                        record.Print();
+                    }
+
                     //All customer records.
                     break;
                 default:
