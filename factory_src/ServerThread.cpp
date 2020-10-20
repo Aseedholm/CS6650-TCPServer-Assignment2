@@ -4,6 +4,14 @@
 #include "ServerThread.h"
 #include "ServerStub.h"
 
+int RobotFactory::returnNumberOfPeers() {
+    return peers;
+}
+
+void RobotFactory::setNumberOfPeers(int peerPassed) {
+    peers = peerPassed;
+}
+
 RobotInfo RobotFactory::CreateRegularRobot(CustomerRequest request, int engineer_id) {
 	RobotInfo robot;
 
@@ -58,8 +66,14 @@ RobotInfo RobotFactory::CreateRobotWithAdmin(CustomerRequest request, int engine
 	robot = fut.get();
 	return robot;
 }
-
+//Check here to see who is connected to this server.
+//Either Primary Server or Client.
+//
 void RobotFactory::EngineerThread(std::unique_ptr<ServerSocket> socket, int id) {
+    //Whenever a cUST places an order, engineer thread receives order.
+    //Check for acknowledge message.
+    //PFA will also send an acknowledge message to the IFA threads.
+    //
 	int engineer_id = id;
 
 
@@ -74,14 +88,18 @@ void RobotFactory::EngineerThread(std::unique_ptr<ServerSocket> socket, int id) 
 	ServerStub stub;
 
 	stub.Init(std::move(socket));
-
+	int returnedAcknowledgemetn = stub.initialAcknowledgementReceived();
+//	std::cout << "SENT FLAG: " << returnedAcknowledgemetn << std::endl;
+//
 	while (true) {
-        request = stub.ReceiveRequest();
+        //In Server stub add function that checks receive message.
+
+        request = stub.ReceiveRequest(); //Write function in stub that checks acknoledgement.
 
 		if (!request.IsValid()) {
 			break;
 		}
-
+        //Check if client connected here or if it is a PFA (meaning this is an idle factory).
         request_type = request.GetRequestType();
 
 		switch (request_type) {
@@ -135,6 +153,7 @@ void RobotFactory::AdminThread(int id) {
 		} else {
             customer_record.erase(customerRequestLog.arg1);
             customer_record.insert(std::pair<int,int>(customerRequestLog.arg1, customerRequestLog.arg2));
+            //customer_record[customerRequestLog.arg1] = customerRequestLog.arg2;
 		}
 
 
@@ -173,28 +192,19 @@ CustomerRecord RobotFactory::GetCustomerRecord(CustomerRequest request) {
 
     int customer_id_return = request.GetCustomerId();
 
-////    admin_req_lock.lock();
-//    adminMutexLock.lock();
-//    if (!notWriting) {
-//        admin_req_cv.wait(adminMutexLock, [this]{return notWriting;});
-//    }
-    admin_req_lock.lock();
+    admin_req_lock.lock(); //MAKE A NEW LOCK
     if (customer_record.count(customer_id_return) > 0) {
-////        adminMutexLock.lock(); //
-
 
         //Add wait with mutex lock based on true/false state of adminWriting boolean. If false then wait, if true
 
         int last_order_return = customer_record.find(customer_id_return)->second;
         recordToReturn.setCustomerInformation(customer_id_return, last_order_return);
 
-//        notWriting = false;
-//        adminMutexLock.unlock();
-////        admin_req_lock.unlock();
         admin_req_lock.unlock();
         return recordToReturn;
     } else {
         recordToReturn.setCustomerInformation(-1, -1);
+        admin_req_lock.unlock();
         return recordToReturn;
     }
 

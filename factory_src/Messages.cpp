@@ -119,7 +119,7 @@ int CustomerRecord::Size() {
 void CustomerRecord::Print() {
 //	std::cout << "Customer ID (RECORD): " << customer_id << " ";
 //	std::cout << "LAST ORDER (RECORD): " << last_order << std::endl;
-	std::cout << "customer_id: " << customer_id << "\t" << "last_order: " << last_order << std::endl;
+	std::cout << "customer_id: " << customer_id << " \t " << "last_order: " << last_order << std::endl;
 }
 ////***************************** CUSTOMER RECORD *****************************////
 
@@ -293,3 +293,111 @@ void RobotInfo::Print() {
 	std::cout << "Admin ID " << admin_id << std::endl;
 }
 //// ROBOT Info ********************************************************
+
+// Replication Record ********************************************************
+ReplicationRequest::ReplicationRequest() {
+	factory_id = -1;
+	committed_index = -1;
+	last_index = -1;
+	opcode = -1;
+	arg1 = -1;
+	arg2 = -1;
+}
+
+void ReplicationRequest::SetRequest(int factory_id_passed, int committed_index_passed, int last_index_passed,
+                                     int opcode_passed, int arg1_passed, int arg2_passed) {
+	factory_id = factory_id_passed;
+	committed_index = committed_index_passed;
+	last_index = last_index_passed;
+	opcode = opcode_passed;
+	arg1 = arg1_passed;
+	arg2 = arg2_passed;
+}
+
+int ReplicationRequest::GetFactoryId() { return factory_id; }
+int ReplicationRequest::GetCommittedIndex() { return committed_index; }
+int ReplicationRequest::GetLastIndex() { return last_index; }
+int ReplicationRequest::GetOpCode() { return opcode; }
+int ReplicationRequest::GetArg1() { return arg1; }
+int ReplicationRequest::GetArg2() { return arg2; }
+
+
+int ReplicationRequest::Size() {
+	return sizeof(factory_id) + sizeof(committed_index) + sizeof(last_index) + sizeof(opcode) + sizeof(arg1) + sizeof(arg2);
+}
+
+void ReplicationRequest::Marshal(char *buffer) {
+	int net_factory_id = htonl(factory_id);
+	int net_committed_index = htonl(committed_index);
+	int net_last_index = htonl(last_index);
+    int net_opcode = htonl(opcode);
+	int net_arg1 = htonl(arg1);
+	int net_arg2 = htonl(arg2);
+
+	int offset = 0;
+	memcpy(buffer + offset, &net_factory_id, sizeof(net_factory_id));
+	offset += sizeof(net_factory_id);
+
+	memcpy(buffer + offset, &net_committed_index, sizeof(net_committed_index));
+	offset += sizeof(net_committed_index);
+
+	memcpy(buffer + offset, &net_last_index, sizeof(net_last_index));
+    offset += sizeof(net_last_index);
+
+    memcpy(buffer + offset, &net_opcode, sizeof(net_opcode));
+	offset += sizeof(net_opcode);
+
+	memcpy(buffer + offset, &net_arg1, sizeof(net_arg1));
+	offset += sizeof(net_arg1);
+
+	memcpy(buffer + offset, &net_arg2, sizeof(net_arg2));
+}
+
+void ReplicationRequest::Unmarshal(char *buffer) {
+	int net_factory_id;
+	int net_committed_index;
+	int net_last_index;
+    int net_opcode;
+	int net_arg1;
+	int net_arg2;
+
+	int offset = 0;
+	memcpy(&net_factory_id, buffer + offset, sizeof(net_factory_id));
+	offset += sizeof(net_factory_id);
+
+	memcpy(&net_committed_index, buffer + offset, sizeof(net_committed_index));
+	offset += sizeof(net_committed_index);
+
+	memcpy(&net_last_index, buffer + offset, sizeof(net_last_index));
+    offset += sizeof(net_last_index);
+
+	memcpy(&net_opcode, buffer + offset, sizeof(net_opcode));
+	offset += sizeof(net_opcode);
+
+	memcpy(&net_arg1, buffer + offset, sizeof(net_arg1));
+	offset += sizeof(net_arg1);
+
+	memcpy(&net_arg2, buffer + offset, sizeof(net_arg2));
+
+
+	factory_id = ntohl(net_factory_id);
+	committed_index = ntohl(net_committed_index);
+	last_index = ntohl(net_last_index);
+	opcode = ntohl(net_opcode);
+	arg1 = ntohl(net_arg1);
+	arg2 = ntohl(net_arg2);
+}
+
+bool ReplicationRequest::IsValid() {
+	return (committed_index != -1);
+}
+
+void ReplicationRequest::Print() {
+	std::cout << "Factory Id: " << factory_id << " ";
+	std::cout << "Commited Index: " << committed_index << " ";
+    std::cout << "Last Index " << last_index << " ";
+	std::cout << "OpCode " << opcode << " ";
+    std::cout << "Arg1 " << arg1 << " ";
+	std::cout << "Arg2 " << arg2 << std::endl;
+}
+//// Replication Record ********************************************************

@@ -37,3 +37,14 @@ CustomerRecord ClientStub::ReadRecord(CustomerRequest request) {
     }
     return recordToReturn;
 }
+
+void ClientStub::InitialAcknowledgement() {
+    char buffer[4];
+    int clientServerFlag = 0;
+    int net_flag = htonl(clientServerFlag);
+    memcpy(buffer, &net_flag, sizeof(net_flag));
+    int size = sizeof(clientServerFlag);
+    if(socket.Send(buffer, size, 0) == 0) {
+        std::cout << "Issue sending Acknowledgement message" << std::endl;
+    }
+}

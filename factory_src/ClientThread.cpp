@@ -14,6 +14,7 @@ void ClientThreadClass::ThreadBody(std::string ip, int port, int id, int orders,
 		std::cout << "Thread " << customer_id << " failed to connect" << std::endl;
 		return;
 	}
+	stub.InitialAcknowledgement(); //Send server a message saying it is the client connecting. **************
 
 	if (request_type == 2) {
         CustomerRequest request;
@@ -29,7 +30,7 @@ void ClientThreadClass::ThreadBody(std::string ip, int port, int id, int orders,
 
 
         for (int i = 0; i < num_orders; i++) {
-                std::cout << "In num orders for loop: " << i << std::endl;
+//                std::cout << "In num orders for loop: " << i << std::endl;
     //		RobotOrder order; //CHANGE TO CUSTOMER REQUEST ***********************************************************
             CustomerRequest request;
 

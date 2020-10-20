@@ -132,6 +132,43 @@ public:
 
 	void Print();
 };
+////////////////////////////////////ReplicationRequest//////////////////////////////
+class ReplicationRequest {
+private:
+	int factory_id;
+	int committed_index;
+	int last_index;
+	int opcode;
+	int arg1;
+	int arg2;
 
+public:
+	ReplicationRequest();
+	void operator = (const ReplicationRequest &replication_request) {
+		factory_id = replication_request.factory_id;
+		committed_index = replication_request.committed_index;
+		last_index = replication_request.last_index;
+        opcode = replication_request.opcode;
+		arg1 = replication_request.arg1;
+		arg2 = replication_request.arg2;
+	}
+	void SetRequest(int factory_id_passed, int committed_index_passed, int last_index_passed, int opcode_passed, int arg1_passed, int arg2_passed);
+	int GetFactoryId();
+	int GetCommittedIndex();
+	int GetLastIndex();
+    int GetOpCode();
+	int GetArg1();
+	int GetArg2();
+
+	int Size();
+
+	void Marshal(char *buffer);
+	void Unmarshal(char *buffer);
+
+	bool IsValid();
+
+	void Print();
+};
+////////////////////////////////////ReplicationRequest//////////////////////////////
 
 #endif // #ifndef __MESSAGES_H__

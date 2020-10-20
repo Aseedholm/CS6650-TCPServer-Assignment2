@@ -35,3 +35,16 @@ int ServerStub::ReturnRecord(CustomerRecord record) {
 	record.Marshal(buffer);
 	return socket->Send(buffer, record.Size(), 0);
 }
+
+int ServerStub::initialAcknowledgementReceived() {
+    char buffer[4];
+    int net_acknowledgement;
+    int sentAcknowledgement = -1;
+	if (socket->Recv(buffer, sizeof(int), 0)) {
+        memcpy(&net_acknowledgement, buffer, sizeof(net_acknowledgement));
+        sentAcknowledgement = ntohl(net_acknowledgement);
+	}
+	return sentAcknowledgement;
+}
+
+

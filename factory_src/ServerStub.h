@@ -2,7 +2,10 @@
 #define __SERVER_STUB_H__
 
 #include <memory>
-
+#include <arpa/inet.h>
+#include <stdio.h>
+#include <string.h>
+#include <iostream>
 #include "ServerSocket.h"
 #include "Messages.h"
 
@@ -18,6 +21,8 @@ public:
 	int SendRobot(RobotInfo info);
 
 	int ReturnRecord(CustomerRecord record);
+
+    int initialAcknowledgementReceived();
 
 };
 

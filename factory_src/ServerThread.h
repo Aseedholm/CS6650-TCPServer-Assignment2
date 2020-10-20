@@ -38,11 +38,13 @@ private:
 
     std::queue<std::unique_ptr<AdminRequest>> adminRequestQueue;
     std::mutex admin_req_lock;
+    std::mutex primary_lock; // This is for the Primary Server and PFA thread.
     std::condition_variable admin_req_cv;
 	std::map<int, int> customer_record;
 	std::vector<MapOp> smr_log;
 
 	bool notWriting = false;
+	int peers;
 
 //	RobotInfo CreateRegularRobot(RobotOrder order, int engineer_id);
 //	RobotInfo CreateSpecialRobot(RobotOrder order, int engineer_id);
@@ -54,6 +56,8 @@ public:
 	void EngineerThread(std::unique_ptr<ServerSocket> socket, int id);
 	void AdminThread(int id);
 	void ExpertThread(int id);
+	int returnNumberOfPeers();
+	void setNumberOfPeers(int peerPassed);
 };
 
 #endif // end of #ifndef __SERVERTHREAD_H__
