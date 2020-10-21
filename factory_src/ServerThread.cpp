@@ -71,9 +71,9 @@ RobotInfo RobotFactory::CreateRobotWithAdmin(CustomerRequest request, int engine
 //
 void RobotFactory::EngineerThread(std::unique_ptr<ServerSocket> socket, int id) {
 
-    for(int i = 0; i < (int)uniqueIdVector.size(); i++) {
-        std::cout << "IN ROBOT FACTORY -> OTHER SERVER: " << uniqueIdVector[i] << " " << ipAddressVector[i] << " " << portVector[i] << std::endl;
-    }
+//    for(int i = 0; i < (int)uniqueIdVector.size(); i++) {
+//        std::cout << "IN ROBOT FACTORY -> OTHER SERVER: " << uniqueIdVector[i] << " " << ipAddressVector[i] << " " << portVector[i] << std::endl;
+//    }
     //Whenever a cUST places an order, engineer thread receives order.
     //Check for acknowledge message.
     //PFA will also send an acknowledge message to the IFA threads.
@@ -93,6 +93,13 @@ void RobotFactory::EngineerThread(std::unique_ptr<ServerSocket> socket, int id) 
 
 	stub.Init(std::move(socket));
 	int returnedAcknowledgement = stub.initialAcknowledgementReceived();
+	//Identified as Primary if returnedAcknowledgement is = 0;
+	//Identified as Backup if returnedAcknowledgement is = 1;
+	//Have if statement - if == 0 use engineer logic if == 1 use IFA logic.
+	//If == 0 set up connection socket in PFA thread.
+	//If == 1 set up listening sockets in IFA thread.
+	std::cout << "FACTORY ID IS: " << factory_id << std::endl;
+	std::cout << "PRIMARY ID IS (PRE UPDATE REQUEST): " << primary_id << std::endl;
 	std::cout << "SENT FLAG: " << returnedAcknowledgement << std::endl;
 //
 	while (true) {
@@ -108,6 +115,9 @@ void RobotFactory::EngineerThread(std::unique_ptr<ServerSocket> socket, int id) 
 
 		switch (request_type) {
 			case 1:
+
+			    primary_id = factory_id;
+			    std::cout << "PRIMARY ID IS (POST UPDATE REQUEST): " << primary_id << std::endl;
                 robot = CreateRobotWithAdmin(request, engineer_id);
 
                 stub.SendRobot(robot);
@@ -150,6 +160,11 @@ void RobotFactory::AdminThread(int id) {
 		customerRequestLog.arg2 = adminRequest->robot.GetOrderNumber();
 		//Add struct to log
         smr_log.push_back(customerRequestLog);
+
+
+        //HERE PFA LOGIC STARTS BEFORE WE DO ANYTHING WITH MAP.
+
+
 
 		//Update map with log request
 		if(customer_record.count(customerRequestLog.arg1) < 0) {
@@ -217,4 +232,12 @@ void RobotFactory::setVectors(std::vector<int> uniqueIdVectorPassed, std::vector
     uniqueIdVector = uniqueIdVectorPassed;
     portVector = portVectorPassed;
     ipAddressVector = ipAddressVectorPassed;
+}
+
+void RobotFactory::setPrimaryId(int idPassed) {
+    primary_id = idPassed;
+}
+
+void RobotFactory::setFactoryId(int idPassed) {
+    factory_id = idPassed;
 }

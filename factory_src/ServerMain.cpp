@@ -31,6 +31,8 @@ int main(int argc, char *argv[]) {
 	uniqueID = atoi(argv[2]);
     peers = atoi(argv[3]);
 
+    factory.setFactoryId(uniqueID);
+    factory.setPrimaryId(-1);
     std::cout << "THIS SERVER: PORT: " << port << " UNIQUE ID: " << uniqueID << " PEERS: " << peers << std::endl;
 
     int correctNumberOfArguments = peers * 3 + 4;

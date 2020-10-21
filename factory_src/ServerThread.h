@@ -68,6 +68,8 @@ public:
 	int returnNumberOfPeers();
 	void setNumberOfPeers(int peerPassed);
 	void setVectors(std::vector<int> uniqueIdVectorPassed, std::vector<int> portVectorPassed, std::vector<std::string> ipAddressVectorPassed);
+	void setPrimaryId(int idPassed);
+	void setFactoryId(int idPassed);
 };
 
 #endif // end of #ifndef __SERVERTHREAD_H__
