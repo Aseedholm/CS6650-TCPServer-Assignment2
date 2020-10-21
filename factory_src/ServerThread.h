@@ -11,6 +11,7 @@
 
 #include "Messages.h"
 #include "ServerSocket.h"
+#include "ServerClientStub.h"
 
 struct ExpertRequest {
 	RobotInfo robot;

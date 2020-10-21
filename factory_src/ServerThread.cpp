@@ -102,46 +102,51 @@ void RobotFactory::EngineerThread(std::unique_ptr<ServerSocket> socket, int id) 
 	std::cout << "PRIMARY ID IS (PRE UPDATE REQUEST): " << primary_id << std::endl;
 	std::cout << "SENT FLAG: " << returnedAcknowledgement << std::endl;
 //
-	while (true) {
-        //In Server stub add function that checks receive message.
+    if(returnedAcknowledgement == 0) { //Engineer connected to client
+        while (true) {
+            //In Server stub add function that checks receive message.
 
-        request = stub.ReceiveRequest(); //Write function in stub that checks acknoledgement.
+            request = stub.ReceiveRequest(); //Write function in stub that checks acknoledgement.
 
-		if (!request.IsValid()) {
-			break;
-		}
-        //Check if client connected here or if it is a PFA (meaning this is an idle factory).
-        request_type = request.GetRequestType();
-
-		switch (request_type) {
-			case 1:
-
-			    primary_id = factory_id;
-			    std::cout << "PRIMARY ID IS (POST UPDATE REQUEST): " << primary_id << std::endl;
-                robot = CreateRobotWithAdmin(request, engineer_id);
-
-                stub.SendRobot(robot);
-				break;
-			case 2:
-                //Get customer record request
-                record = GetCustomerRecord(request);
-                stub.ReturnRecord(record);
-				break;
-            case 3:
-                record = GetCustomerRecord(request);
-                stub.ReturnRecord(record);
+            if (!request.IsValid()) {
                 break;
-			default:
-				std::cout << "Undefined request type (Server): "
-					<< request_type << std::endl;
+            }
+            //Check if client connected here or if it is a PFA (meaning this is an idle factory).
+            request_type = request.GetRequestType();
 
-		}
-	}
-//	notWriting = true;
+            switch (request_type) {
+                case 1:
+
+                    primary_id = factory_id;
+                    std::cout << "PRIMARY ID IS (POST UPDATE REQUEST): " << primary_id << std::endl;
+                    robot = CreateRobotWithAdmin(request, engineer_id);
+
+                    stub.SendRobot(robot);
+                    break;
+                case 2:
+                    //Get customer record request
+                    record = GetCustomerRecord(request);
+                    stub.ReturnRecord(record);
+                    break;
+                case 3:
+                    record = GetCustomerRecord(request);
+                    stub.ReturnRecord(record);
+                    break;
+                default:
+                    std::cout << "Undefined request type (Server): "
+                        << request_type << std::endl;
+
+            }
+        }
+    } else if (returnedAcknowledgement == 1) { //connected to PFA so IFA role.
+//        ReplicationRequest replication_request = stub.ReceiveReplicationRequest();
+    }
+
 }
 
 void RobotFactory::AdminThread(int id) {
 	std::unique_lock<std::mutex> ul(admin_req_lock, std::defer_lock);
+	ServerClientStub server_client_stub;
 	while (true) {
 		ul.lock();
 
@@ -162,9 +167,12 @@ void RobotFactory::AdminThread(int id) {
         smr_log.push_back(customerRequestLog);
 
 
-        //HERE PFA LOGIC STARTS BEFORE WE DO ANYTHING WITH MAP.
 
-
+//        //HERE PFA LOGIC STARTS BEFORE WE DO ANYTHING WITH MAP.
+        for (int i = 0; i < peers; i++) {
+            server_client_stub.Init(ipAddressVector[i], portVector[i]);
+//            server_client_stub.PFAInitialAcknowledgement();
+        }
 
 		//Update map with log request
 		if(customer_record.count(customerRequestLog.arg1) < 0) {
