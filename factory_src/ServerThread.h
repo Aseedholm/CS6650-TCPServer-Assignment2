@@ -43,6 +43,15 @@ private:
 	std::map<int, int> customer_record;
 	std::vector<MapOp> smr_log;
 
+	int last_index;
+	int committed_index;
+	int primary_id;
+	int factory_id;
+
+	std::vector<int> uniqueIdVector;
+	std::vector<int> portVector;
+	std::vector<std::string> ipAddressVector;
+
 	bool notWriting = false;
 	int peers;
 
@@ -58,6 +67,7 @@ public:
 	void ExpertThread(int id);
 	int returnNumberOfPeers();
 	void setNumberOfPeers(int peerPassed);
+	void setVectors(std::vector<int> uniqueIdVectorPassed, std::vector<int> portVectorPassed, std::vector<std::string> ipAddressVectorPassed);
 };
 
 #endif // end of #ifndef __SERVERTHREAD_H__

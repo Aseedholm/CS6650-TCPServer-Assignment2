@@ -24,6 +24,13 @@ public:
 
     int initialAcknowledgementReceived();
 
+    ReplicationRequest ReceiveReplicationRequest();
+
+    void ReplicationResponse();
+
+    //receiveReplicationUpdate
+    //sendReplicationResponse
+
 };
 
 #endif // end of #ifndef __SERVER_STUB_H__

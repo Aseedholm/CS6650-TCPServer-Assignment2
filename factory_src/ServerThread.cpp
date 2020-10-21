@@ -70,6 +70,10 @@ RobotInfo RobotFactory::CreateRobotWithAdmin(CustomerRequest request, int engine
 //Either Primary Server or Client.
 //
 void RobotFactory::EngineerThread(std::unique_ptr<ServerSocket> socket, int id) {
+
+    for(int i = 0; i < (int)uniqueIdVector.size(); i++) {
+        std::cout << "IN ROBOT FACTORY -> OTHER SERVER: " << uniqueIdVector[i] << " " << ipAddressVector[i] << " " << portVector[i] << std::endl;
+    }
     //Whenever a cUST places an order, engineer thread receives order.
     //Check for acknowledge message.
     //PFA will also send an acknowledge message to the IFA threads.
@@ -88,8 +92,8 @@ void RobotFactory::EngineerThread(std::unique_ptr<ServerSocket> socket, int id) 
 	ServerStub stub;
 
 	stub.Init(std::move(socket));
-	int returnedAcknowledgemetn = stub.initialAcknowledgementReceived();
-//	std::cout << "SENT FLAG: " << returnedAcknowledgemetn << std::endl;
+	int returnedAcknowledgement = stub.initialAcknowledgementReceived();
+	std::cout << "SENT FLAG: " << returnedAcknowledgement << std::endl;
 //
 	while (true) {
         //In Server stub add function that checks receive message.
@@ -207,6 +211,10 @@ CustomerRecord RobotFactory::GetCustomerRecord(CustomerRequest request) {
         admin_req_lock.unlock();
         return recordToReturn;
     }
+}
 
-
+void RobotFactory::setVectors(std::vector<int> uniqueIdVectorPassed, std::vector<int> portVectorPassed, std::vector<std::string> ipAddressVectorPassed) {
+    uniqueIdVector = uniqueIdVectorPassed;
+    portVector = portVectorPassed;
+    ipAddressVector = ipAddressVectorPassed;
 }

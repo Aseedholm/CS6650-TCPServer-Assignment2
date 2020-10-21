@@ -47,4 +47,25 @@ int ServerStub::initialAcknowledgementReceived() {
 	return sentAcknowledgement;
 }
 
+ReplicationRequest ServerStub::ReceiveReplicationRequest() {
+    char buffer[32];
+	ReplicationRequest replication_request;
+	if (socket->Recv(buffer, replication_request.Size(), 0)) {
+		replication_request.Unmarshal(buffer);
+	}
+	return replication_request;
+}
+
+
+void ServerStub::ReplicationResponse() {
+    char buffer[4];
+    int replicationComplete = 9;
+    int net_replication_complete = htonl(replicationComplete);
+    memcpy(buffer, &net_replication_complete, sizeof(net_replication_complete));
+    int size = sizeof(replicationComplete);
+    if(socket->Send(buffer, size, 0) == 0) {
+        std::cout << "Issue sending replication response message" << std::endl;
+    }
+}
+
 
