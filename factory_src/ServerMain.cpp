@@ -33,6 +33,7 @@ int main(int argc, char *argv[]) {
 
     factory.setFactoryId(uniqueID);
     factory.setPrimaryId(-1);
+    factory.setCommitedIndex(-1);
     std::cout << "THIS SERVER: PORT: " << port << " UNIQUE ID: " << uniqueID << " PEERS: " << peers << std::endl;
 
     int correctNumberOfArguments = peers * 3 + 4;
@@ -87,7 +88,7 @@ int main(int argc, char *argv[]) {
 		std::cout << "Socket initialization failed" << std::endl;
 		return 0;
 	}
-
+    std::cout << "INITIAL SOCKET PASSED" << std::endl;
 	while ((new_socket = socket.Accept())) {
 		std::thread engineer_thread(&RobotFactory::EngineerThread, &factory,
 				std::move(new_socket), engineer_cnt++); ///WHY ARE WE PASSING &RobotFactory::EngineerThread and not factory.engineerThread <---function from object.

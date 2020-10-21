@@ -71,6 +71,7 @@ public:
 	void setVectors(std::vector<int> uniqueIdVectorPassed, std::vector<int> portVectorPassed, std::vector<std::string> ipAddressVectorPassed);
 	void setPrimaryId(int idPassed);
 	void setFactoryId(int idPassed);
+	void setCommitedIndex(int commitedIndexPassed);
 };
 
 #endif // end of #ifndef __SERVERTHREAD_H__

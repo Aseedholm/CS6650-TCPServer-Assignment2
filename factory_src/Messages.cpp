@@ -394,10 +394,10 @@ bool ReplicationRequest::IsValid() {
 
 void ReplicationRequest::Print() {
 	std::cout << "Factory Id: " << factory_id << " ";
-	std::cout << "Commited Index: " << committed_index << " ";
-    std::cout << "Last Index " << last_index << " ";
-	std::cout << "OpCode " << opcode << " ";
-    std::cout << "Arg1 " << arg1 << " ";
-	std::cout << "Arg2 " << arg2 << std::endl;
+	std::cout << " Commited Index: " << committed_index << " ";
+    std::cout << " Last Index " << last_index << " ";
+	std::cout << " OpCode " << opcode << " ";
+    std::cout << " Arg1 " << arg1 << " ";
+	std::cout << " Arg2 " << arg2 << std::endl;
 }
 //// Replication Record ********************************************************

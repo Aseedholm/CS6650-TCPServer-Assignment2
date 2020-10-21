@@ -13,7 +13,8 @@ ReplicationRequest ServerClientStub::ReplicationRequestSendRec(ReplicationReques
 	replication_request.Marshal(buffer);
 	size = replication_request.Size();
 	if (socket.Send(buffer, size, 0)) { //if send succeeds return 1, 0.
-		size = replication_request_returned.Size();
+//		size = replication_request_returned.Size();
+        size = sizeof(int);
 		if (socket.Recv(buffer, size, 0)) {
 			replication_request_returned.Unmarshal(buffer);
 		}

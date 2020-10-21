@@ -139,14 +139,77 @@ void RobotFactory::EngineerThread(std::unique_ptr<ServerSocket> socket, int id) 
             }
         }
     } else if (returnedAcknowledgement == 1) { //connected to PFA so IFA role.
-//        ReplicationRequest replication_request = stub.ReceiveReplicationRequest();
+        for(int i = 0; i < (int)uniqueIdVector.size(); i++) {
+            std::cout << "IN ROBOT FACTORY IFA -> OTHER SERVER: " << uniqueIdVector[i] << " " << ipAddressVector[i] << " " << portVector[i] << std::endl;
+        }
+//        while (true) {
+            //While true
+            //Receive replication requests
+            //Update necessary variables.
+            //Send reply back.
+            ReplicationRequest replication_request = stub.ReceiveReplicationRequest();
+            primary_id = replication_request.GetFactoryId();
+
+            MapOp customerRequestLogFromPrimary;
+            customerRequestLogFromPrimary.opcode = 1;
+            customerRequestLogFromPrimary.arg1 = replication_request.GetArg1();
+            customerRequestLogFromPrimary.arg2 = replication_request.GetArg2();
+            smr_log[replication_request.GetLastIndex()]; //MAY NEED TO REVIEW LAST INDEX LOGIC>**********@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+            last_index = replication_request.GetLastIndex();
+
+                        //Update map with log request
+            if(customer_record.count(customerRequestLogFromPrimary.arg1) < 0) {
+                customer_record.insert(std::pair<int,int>(customerRequestLogFromPrimary.arg1, customerRequestLogFromPrimary.arg2));
+            } else {
+                customer_record.erase(customerRequestLogFromPrimary.arg1);
+                customer_record.insert(std::pair<int,int>(customerRequestLogFromPrimary.arg1, customerRequestLogFromPrimary.arg2));
+                //customer_record[customerRequestLog.arg1] = customerRequestLog.arg2;
+            }
+
+            committed_index = last_index;
+
+            //set primary id = factory id
+            //create mapop object with replication_request data
+            replication_request.Print();
+            stub.ReplicationResponse();
+            std::cout<<"REPLICATION RESPONE COMPLETE" << std::endl;
+
+//
+//            //In Server stub add function that checks receive message.
+//
+//            request = stub.ReceiveRequest(); //Write function in stub that checks acknoledgement.
+//
+//            if (!request.IsValid()) {
+//                break;
+//            }
+//            //Check if client connected here or if it is a PFA (meaning this is an idle factory).
+//            request_type = request.GetRequestType();
+//
+//            switch (request_type) {
+//                case 1:
+//                    break;
+//                case 2:
+//                    //Get customer record request
+//                    record = GetCustomerRecord(request);
+//                    stub.ReturnRecord(record);
+//                    break;
+//                case 3:
+//                    record = GetCustomerRecord(request);
+//                    stub.ReturnRecord(record);
+//                    break;
+//                default:
+//                    std::cout << "Undefined request type (Server): "
+//                        << request_type << std::endl;
+//
+//            }
+//        }
     }
 
 }
 
 void RobotFactory::AdminThread(int id) {
 	std::unique_lock<std::mutex> ul(admin_req_lock, std::defer_lock);
-	ServerClientStub server_client_stub;
+
 	while (true) {
 		ul.lock();
 
@@ -165,13 +228,17 @@ void RobotFactory::AdminThread(int id) {
 		customerRequestLog.arg2 = adminRequest->robot.GetOrderNumber();
 		//Add struct to log
         smr_log.push_back(customerRequestLog);
-
-
+        last_index = smr_log.size() - 1;
+        ReplicationRequest request_to_send;
+        request_to_send.SetRequest(factory_id, committed_index, last_index, customerRequestLog.opcode, customerRequestLog.arg1, customerRequestLog.arg2);
 
 //        //HERE PFA LOGIC STARTS BEFORE WE DO ANYTHING WITH MAP.
         for (int i = 0; i < peers; i++) {
+            ServerClientStub server_client_stub;
             server_client_stub.Init(ipAddressVector[i], portVector[i]);
-//            server_client_stub.PFAInitialAcknowledgement();
+            server_client_stub.PFAInitialAcknowledgement();
+            server_client_stub.ReplicationRequestSendRec(request_to_send);
+            std::cout << "IN ROBOT FACTORY PFA -> OTHER SERVER: " << uniqueIdVector[i] << " " << ipAddressVector[i] << " " << portVector[i] << std::endl;
         }
 
 		//Update map with log request
@@ -248,4 +315,8 @@ void RobotFactory::setPrimaryId(int idPassed) {
 
 void RobotFactory::setFactoryId(int idPassed) {
     factory_id = idPassed;
+}
+
+void RobotFactory::setCommitedIndex(int commitedIndexPassed) {
+    committed_index = commitedIndexPassed;
 }
