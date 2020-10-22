@@ -71,9 +71,6 @@ RobotInfo RobotFactory::CreateRobotWithAdmin(CustomerRequest request, int engine
 //
 void RobotFactory::EngineerThread(std::unique_ptr<ServerSocket> socket, int id) {
 
-//    for(int i = 0; i < (int)uniqueIdVector.size(); i++) {
-//        std::cout << "IN ROBOT FACTORY -> OTHER SERVER: " << uniqueIdVector[i] << " " << ipAddressVector[i] << " " << portVector[i] << std::endl;
-//    }
     //Whenever a cUST places an order, engineer thread receives order.
     //Check for acknowledge message.
     //PFA will also send an acknowledge message to the IFA threads.
@@ -98,9 +95,9 @@ void RobotFactory::EngineerThread(std::unique_ptr<ServerSocket> socket, int id) 
 	//Have if statement - if == 0 use engineer logic if == 1 use IFA logic.
 	//If == 0 set up connection socket in PFA thread.
 	//If == 1 set up listening sockets in IFA thread.
-	std::cout << "FACTORY ID IS: " << factory_id << std::endl;
-	std::cout << "PRIMARY ID IS (PRE UPDATE REQUEST): " << primary_id << std::endl;
-	std::cout << "SENT FLAG: " << returnedAcknowledgement << std::endl;
+//	std::cout << "FACTORY ID IS: " << factory_id << std::endl;
+//	std::cout << "PRIMARY ID IS (PRE UPDATE REQUEST): " << primary_id << std::endl;
+//	std::cout << "SENT FLAG: " << returnedAcknowledgement << std::endl;
 //
     if(returnedAcknowledgement == 0) { //Engineer connected to client
         while (true) {
@@ -118,7 +115,7 @@ void RobotFactory::EngineerThread(std::unique_ptr<ServerSocket> socket, int id) 
                 case 1:
 
                     primary_id = factory_id;
-                    std::cout << "PRIMARY ID IS (POST UPDATE REQUEST): " << primary_id << std::endl;
+//                    std::cout << "PRIMARY ID IS (POST UPDATE REQUEST): " << primary_id << std::endl;
                     robot = CreateRobotWithAdmin(request, engineer_id);
 
                     stub.SendRobot(robot);
@@ -139,14 +136,10 @@ void RobotFactory::EngineerThread(std::unique_ptr<ServerSocket> socket, int id) 
             }
         }
     } else if (returnedAcknowledgement == 1) { //connected to PFA so IFA role.
-        for(int i = 0; i < (int)uniqueIdVector.size(); i++) {
-            std::cout << "IN ROBOT FACTORY IFA -> OTHER SERVER: " << uniqueIdVector[i] << " " << ipAddressVector[i] << " " << portVector[i] << std::endl;
-        }
-//        while (true) {
-            //While true
-            //Receive replication requests
-            //Update necessary variables.
-            //Send reply back.
+//        for(int i = 0; i < (int)uniqueIdVector.size(); i++) {
+//            std::cout << "IN ROBOT FACTORY IFA -> OTHER SERVER: " << uniqueIdVector[i] << " " << ipAddressVector[i] << " " << portVector[i] << std::endl;
+//        }
+
             ReplicationRequest replication_request = stub.ReceiveReplicationRequest();
             primary_id = replication_request.GetFactoryId();
 
@@ -170,39 +163,10 @@ void RobotFactory::EngineerThread(std::unique_ptr<ServerSocket> socket, int id) 
 
             //set primary id = factory id
             //create mapop object with replication_request data
-            replication_request.Print();
+//            replication_request.Print();
             stub.ReplicationResponse();
-            std::cout<<"REPLICATION RESPONE COMPLETE" << std::endl;
+//            std::cout<<"REPLICATION RESPONE COMPLETE" << std::endl;
 
-//
-//            //In Server stub add function that checks receive message.
-//
-//            request = stub.ReceiveRequest(); //Write function in stub that checks acknoledgement.
-//
-//            if (!request.IsValid()) {
-//                break;
-//            }
-//            //Check if client connected here or if it is a PFA (meaning this is an idle factory).
-//            request_type = request.GetRequestType();
-//
-//            switch (request_type) {
-//                case 1:
-//                    break;
-//                case 2:
-//                    //Get customer record request
-//                    record = GetCustomerRecord(request);
-//                    stub.ReturnRecord(record);
-//                    break;
-//                case 3:
-//                    record = GetCustomerRecord(request);
-//                    stub.ReturnRecord(record);
-//                    break;
-//                default:
-//                    std::cout << "Undefined request type (Server): "
-//                        << request_type << std::endl;
-//
-//            }
-//        }
     }
 
 }
@@ -238,7 +202,7 @@ void RobotFactory::AdminThread(int id) {
             server_client_stub.Init(ipAddressVector[i], portVector[i]);
             server_client_stub.PFAInitialAcknowledgement();
             server_client_stub.ReplicationRequestSendRec(request_to_send);
-            std::cout << "IN ROBOT FACTORY PFA -> OTHER SERVER: " << uniqueIdVector[i] << " " << ipAddressVector[i] << " " << portVector[i] << std::endl;
+//            std::cout << "IN ROBOT FACTORY PFA -> OTHER SERVER: " << uniqueIdVector[i] << " " << ipAddressVector[i] << " " << portVector[i] << std::endl;
         }
 
 		//Update map with log request
@@ -249,6 +213,7 @@ void RobotFactory::AdminThread(int id) {
             customer_record.insert(std::pair<int,int>(customerRequestLog.arg1, customerRequestLog.arg2));
             //customer_record[customerRequestLog.arg1] = customerRequestLog.arg2;
 		}
+		committed_index = last_index;
 
 
 		ul.unlock();

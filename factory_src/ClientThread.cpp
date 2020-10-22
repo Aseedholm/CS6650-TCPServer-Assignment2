@@ -44,7 +44,7 @@ void ClientThreadClass::ThreadBody(std::string ip, int port, int id, int orders,
             switch (request_type) {
                 case 1:
                     robot = stub.OrderRobot(request);
-                    robot.Print();
+//                    robot.Print();
                     break;
                 case 2:
     ////				//Customer record reading
