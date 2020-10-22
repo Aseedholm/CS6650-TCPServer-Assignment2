@@ -66,20 +66,14 @@ RobotInfo RobotFactory::CreateRobotWithAdmin(CustomerRequest request, int engine
 	robot = fut.get();
 	return robot;
 }
-//Check here to see who is connected to this server.
-//Either Primary Server or Client.
-//
+
 void RobotFactory::EngineerThread(std::unique_ptr<ServerSocket> socket, int id) {
 
-    //Whenever a cUST places an order, engineer thread receives order.
-    //Check for acknowledge message.
-    //PFA will also send an acknowledge message to the IFA threads.
-    //
 	int engineer_id = id;
 
 
 	int request_type;
-//	RobotOrder order;
+
     CustomerRequest request;
 
 
@@ -90,15 +84,7 @@ void RobotFactory::EngineerThread(std::unique_ptr<ServerSocket> socket, int id) 
 
 	stub.Init(std::move(socket));
 	int returnedAcknowledgement = stub.initialAcknowledgementReceived();
-	//Identified as Primary if returnedAcknowledgement is = 0;
-	//Identified as Backup if returnedAcknowledgement is = 1;
-	//Have if statement - if == 0 use engineer logic if == 1 use IFA logic.
-	//If == 0 set up connection socket in PFA thread.
-	//If == 1 set up listening sockets in IFA thread.
-//	std::cout << "FACTORY ID IS: " << factory_id << std::endl;
-//	std::cout << "PRIMARY ID IS (PRE UPDATE REQUEST): " << primary_id << std::endl;
-//	std::cout << "SENT FLAG: " << returnedAcknowledgement << std::endl;
-//
+
     if(returnedAcknowledgement == 0) { //Engineer connected to client
         while (true) {
             //In Server stub add function that checks receive message.
@@ -116,7 +102,6 @@ void RobotFactory::EngineerThread(std::unique_ptr<ServerSocket> socket, int id) 
 
                     primary_id = factory_id;
 
-//                    std::cout << "PRIMARY ID IS (POST UPDATE REQUEST): " << primary_id << std::endl;
                     robot = CreateRobotWithAdmin(request, engineer_id);
 
                     stub.SendRobot(robot);
@@ -137,9 +122,7 @@ void RobotFactory::EngineerThread(std::unique_ptr<ServerSocket> socket, int id) 
             }
         }
     } else if (returnedAcknowledgement == 1) { //connected to PFA so IFA role.
-//        for(int i = 0; i < (int)uniqueIdVector.size(); i++) {
-//            std::cout << "IN ROBOT FACTORY IFA -> OTHER SERVER: " << uniqueIdVector[i] << " " << ipAddressVector[i] << " " << portVector[i] << std::endl;
-//        }
+
 
             ReplicationRequest replication_request = stub.ReceiveReplicationRequest();
             primary_id = replication_request.GetFactoryId();
@@ -148,68 +131,29 @@ void RobotFactory::EngineerThread(std::unique_ptr<ServerSocket> socket, int id) 
             customerRequestLogFromPrimary.opcode = 1;
             customerRequestLogFromPrimary.arg1 = replication_request.GetArg1();
             customerRequestLogFromPrimary.arg2 = replication_request.GetArg2();
-            //check if last index from primary is the same as the last index I just pushed from.  /./11:25 10/22/20
-            //if last_index in IFA +1 // == replication_request.last index
-            smr_log.push_back(customerRequestLogFromPrimary); //MAY NEED TO REVIEW LAST INDEX LOGIC>**********@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-//            last_index = replication_request.GetLastIndex();
+            smr_log.push_back(customerRequestLogFromPrimary);
+
             last_index = smr_log.size() - 1;
 
 
-//            std::cout << "LOG SIZE: " << smr_log.size() << std::endl;
-            //Check commited index of this server and
-            //for loop myCommited to the PassedCommited index
-            //MapOP passed would be index 7, the commited index passed would be 6, and the FIA's index would be 5.
-            replication_request.Print();
-            std::cout << "IFA COMMITED INDEX " << committed_index << std::endl;
-            //
-            if (last_index - committed_index > -1) {
-                std::cout << last_index - committed_index << std::endl;
-            }
             int passedCommitedIndex = replication_request.GetCommittedIndex();
+            ///REFER TO THIS FOR IMPLEMENTING PRIMARY SWITCH            ///REFER TO THIS FOR IMPLEMENTING PRIMARY SWITCH            ///REFER TO THIS FOR IMPLEMENTING PRIMARY SWITCH
             //IMPLEMENT LOGIC SO THAT IF PIMARY IS SWITCHED THE FORMER PRIMARY DOESN'T ---> update as it is already caught up
             //Scenario
             //1) Primary commited index = 5 / Idle1 = 4 / Idle2 = 4
             //2) Switch Primary --> Primary (Idle1) commited needs to jump by 1 (index 5) and update the log (Do this where we set primary ID)
-            //2) Idle1(FormerPrimary) will do nothing when replication request is called on update from Current Primary (Former Idle1) as it is up to date
+            //2) Idle1(FormerPrimary) will do nothing when replication request is called on update from
+            //Current Primary (Former Idle1) as it is up to date
             //2) Idle2 will update accordingly as Primary instructs with commit at index 5.
+            ///REFER TO THIS FOR IMPLEMENTING PRIMARY SWITCH            ///REFER TO THIS FOR IMPLEMENTING PRIMARY SWITCH            ///REFER TO THIS FOR IMPLEMENTING PRIMARY SWITCH
             if (passedCommitedIndex > -1) {
 
                 customer_record[smr_log[passedCommitedIndex].arg1] = smr_log[passedCommitedIndex].arg2;
-
-//                            //Update map with log request
-//                if(customer_record.count(smr_log[replication_request.GetCommittedIndex()].arg1) < 0) {
-//                    customer_record.insert(std::pair<int,int>(smr_log[replication_request.GetCommittedIndex()].arg1, smr_log[replication_request.GetCommittedIndex()].arg2));
-//                } else {
-//                    customer_record.erase(smr_log[replication_request.GetCommittedIndex()].arg1);
-//                    customer_record.insert(std::pair<int,int>(smr_log[replication_request.GetCommittedIndex()].arg1, smr_log[replication_request.GetCommittedIndex()].arg2));
-////                    customer_record[customerRequestLog.arg1] = customerRequestLog.arg2;
-//                }
-
-
-
-
-
-//                if(customer_record.count(customerRequestLogFromPrimary.arg1) < 0) {
-//                    customer_record.insert(std::pair<int,int>(customerRequestLogFromPrimary.arg1, customerRequestLogFromPrimary.arg2));
-//                } else {
-//                    customer_record.erase(customerRequestLogFromPrimary.arg1);
-//                    customer_record.insert(std::pair<int,int>(customerRequestLogFromPrimary.arg1, customerRequestLogFromPrimary.arg2));
-//                    //customer_record[customerRequestLog.arg1] = customerRequestLog.arg2;
-//                }
-
             }
 
-
-            committed_index = last_index;
-//            committed_index = replication_request.GetCommittedIndex();
-
-            //set primary id = factory id
-            //create mapop object with replication_request data
-//            replication_request.Print();
+            committed_index = last_index - 1;
             stub.ReplicationResponse();
-//            std::cout<<"REPLICATION RESPONE COMPLETE" << std::endl;
-
     }
 
 }
@@ -220,6 +164,10 @@ void RobotFactory::AdminThread(int id) {
 	while (true) {
 		ul.lock();
 
+//        if (smr_log.size() - committed_index > 1 && committed_index != -1) {
+////            std::cout << "HERE HELLO HERE @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@" << std::endl;
+//        }
+
 		if (adminRequestQueue.empty()) {
 			admin_req_cv.wait(ul, [this]{ return !adminRequestQueue.empty(); }); //Can be triggered when thread is waked up.
 		}
@@ -227,8 +175,19 @@ void RobotFactory::AdminThread(int id) {
 		auto adminRequest = std::move(adminRequestQueue.front());
 		adminRequestQueue.pop();
 
-        //Create MapOp struct
 
+        if (last_index > committed_index && committed_index != -1) { //This logic is to handle if a Idle Factory becomes a Primary Factory.
+            committed_index = last_index;
+            ReplicationRequest request_to_sendCatchUp;
+            request_to_sendCatchUp.SetRequest(factory_id, committed_index, last_index,
+                                               smr_log[committed_index].opcode,
+                                                smr_log[committed_index].arg1,
+                                                 smr_log[committed_index].arg2);
+            customer_record[smr_log[committed_index].arg1] = smr_log[committed_index].arg2; //Instead of the if else statment 257 -> 264
+        }
+
+
+        //Create MapOp struct
 		MapOp customerRequestLog;
 		customerRequestLog.opcode = 1;
 		customerRequestLog.arg1 = adminRequest->robot.GetCustomerId();
@@ -236,32 +195,21 @@ void RobotFactory::AdminThread(int id) {
 		//Add struct to log
         smr_log.push_back(customerRequestLog);
         last_index = smr_log.size() - 1;
+
         ReplicationRequest request_to_send;
         request_to_send.SetRequest(factory_id, committed_index, last_index, customerRequestLog.opcode, customerRequestLog.arg1, customerRequestLog.arg2);
 
-//        //HERE PFA LOGIC STARTS BEFORE WE DO ANYTHING WITH MAP.
         for (int i = 0; i < peers; i++) {
             ServerClientStub server_client_stub;
             server_client_stub.Init(ipAddressVector[i], portVector[i]);
             server_client_stub.PFAInitialAcknowledgement();
             server_client_stub.ReplicationRequestSendRec(request_to_send);
-//            std::cout << "IN ROBOT FACTORY PFA -> OTHER SERVER: " << uniqueIdVector[i] << " " << ipAddressVector[i] << " " << portVector[i] << std::endl;
         }
-        //For real life implementation should use LOG LAST INDEX>
-		//Update map with log request
-		if(customer_record.count(smr_log[last_index].arg1) < 0) {
-//            customer_record.insert(std::pair<int,int>(customerRequestLog.arg1, customerRequestLog.arg2));
-            customer_record.insert(std::pair<int,int>(smr_log[last_index].arg1, smr_log[last_index].arg2)); //CHANGED POST OFFICE HOURS
-		} else {
-            customer_record.erase(smr_log[last_index].arg1);
-            customer_record.insert(std::pair<int,int>(smr_log[last_index].arg1, smr_log[last_index].arg2)); //CHANGED POST OFFICE HOURS
-            //customer_record[customerRequestLog.arg1] = customerRequestLog.arg2;
-		}
-		committed_index = last_index;
-		std::cout << "PFA COMMITED INDEX " << committed_index << std::endl;
-        //Modify socket function if needed. **10/22/2020.
-        //
 
+
+		customer_record[smr_log[last_index].arg1] = smr_log[last_index].arg2; //Instead of the if else statment 257 -> 264
+
+		committed_index = last_index;
 		ul.unlock();
 
         adminRequest->robot.SetAdminId(id);
