@@ -14,7 +14,7 @@ private:
 	std::unique_ptr<ServerSocket> socket;
 public:
 	ServerStub();
-	void Init(std::unique_ptr<ServerSocket> socket);
+	int Init(std::unique_ptr<ServerSocket> socket);
 	RobotOrder ReceiveOrder();
 	CustomerRequest ReceiveRequest();
 

@@ -2,8 +2,9 @@
 
 ServerStub::ServerStub() {}
 
-void ServerStub::Init(std::unique_ptr<ServerSocket> socket) {
+int ServerStub::Init(std::unique_ptr<ServerSocket> socket) {
 	this->socket = std::move(socket);
+	return this->socket->getSocketStatus();
 }
 
 RobotOrder ServerStub::ReceiveOrder() {

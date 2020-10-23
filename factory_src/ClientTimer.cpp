@@ -39,14 +39,18 @@ void ClientTimer::Merge(ClientTimer timer) {
 	}
 	if (timer.max > max) {
 		max = timer.max;
-	}	
+	}
 }
 
 void ClientTimer::PrintStats() {
+    std::cout << "[avg latency]\t";
+    std::cout << "[min latency]\t";
+    std::cout << "[max latency]\t";
+    std::cout << "[throughput]\t" << std::endl;
 	std::cout << std::fixed << std::setprecision(3);
-	std::cout << sum.count() / op_count << "\t";
-	std::cout << min.count() << "\t";
-	std::cout << max.count() << "\t";
+	std::cout << sum.count() / op_count << " \t |";
+	std::cout << min.count() << " \t |";
+	std::cout << max.count() << " \t |";
 	std::cout << op_count / elapsed_time.count() * 1000000.0f << std::endl;
 }
 

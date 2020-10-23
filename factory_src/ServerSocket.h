@@ -14,6 +14,9 @@ public:
 
 	bool Init(int port);
 	std::unique_ptr<ServerSocket> Accept();
+	int getSocketStatus();
+private:
+    int socketStatus;
 };
 
 

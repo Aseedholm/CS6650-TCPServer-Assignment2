@@ -33,3 +33,7 @@ void ServerClientStub::PFAInitialAcknowledgement() {
     }
 }
 
+void ServerClientStub::closeSocket() {
+    socket.Close();
+}
+

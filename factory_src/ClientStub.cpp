@@ -14,6 +14,7 @@ RobotInfo ClientStub::OrderRobot(CustomerRequest request) {
 	request.Marshal(buffer);
 	size = request.Size();
 	if (socket.Send(buffer, size, 0)) { //if send succeeds return 1, 0.
+//	if (socket.Send(buffer, size, MSG_NOSIGNAL)) { //if send succeeds return 1, 0.
 		size = info.Size();
 		if (socket.Recv(buffer, size, 0)) {
 			info.Unmarshal(buffer);
@@ -30,6 +31,7 @@ CustomerRecord ClientStub::ReadRecord(CustomerRequest request) {
     request.Marshal(buffer);
     size = request.Size();
     if (socket.Send(buffer, size, 0)) {
+//    if (socket.Send(buffer, size, MSG_NOSIGNAL)) {
         size = recordToReturn.Size();
         if(socket.Recv(buffer, size, 0)) {
             recordToReturn.Unmarshal(buffer);
@@ -45,6 +47,7 @@ void ClientStub::InitialAcknowledgement() {
     memcpy(buffer, &net_flag, sizeof(net_flag));
     int size = sizeof(clientServerFlag);
     if(socket.Send(buffer, size, 0) == 0) {
+//    if(socket.Send(buffer, size, MSG_NOSIGNAL) == 0) {
         std::cout << "Issue sending Acknowledgement message" << std::endl;
     }
 }

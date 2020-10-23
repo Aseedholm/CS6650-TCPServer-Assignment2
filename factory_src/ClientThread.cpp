@@ -12,6 +12,7 @@ void ClientThreadClass::ThreadBody(std::string ip, int port, int id, int orders,
     request_type = type;
 	if (!stub.Init(ip, port)) {
 		std::cout << "Thread " << customer_id << " failed to connect" << std::endl;
+//		std::terminate();
 		return;
 	}
 	stub.InitialAcknowledgement(); //Send server a message saying it is the client connecting. **************

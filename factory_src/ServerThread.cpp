@@ -83,6 +83,12 @@ void RobotFactory::EngineerThread(std::unique_ptr<ServerSocket> socket, int id) 
 	ServerStub stub;
 
 	stub.Init(std::move(socket));
+//    int returnedInitValue = stub.Init(std::move(socket));
+//    std::cout << "STUB IN ENG/IFA THREAD's VALUE: " << returnedInitValue << std::endl;
+//    if (returnedInitValue < 0) {
+//        std::cout << "*******************************************************THIS IS WHERE WE'D CANCEL IFA*******************************************************" << std::endl;
+//    }
+
 	int returnedAcknowledgement = stub.initialAcknowledgementReceived();
 
     if(returnedAcknowledgement == 0) { //Engineer connected to client
@@ -138,15 +144,7 @@ void RobotFactory::EngineerThread(std::unique_ptr<ServerSocket> socket, int id) 
 
 
             int passedCommitedIndex = replication_request.GetCommittedIndex();
-            ///REFER TO THIS FOR IMPLEMENTING PRIMARY SWITCH            ///REFER TO THIS FOR IMPLEMENTING PRIMARY SWITCH            ///REFER TO THIS FOR IMPLEMENTING PRIMARY SWITCH
-            //IMPLEMENT LOGIC SO THAT IF PIMARY IS SWITCHED THE FORMER PRIMARY DOESN'T ---> update as it is already caught up
-            //Scenario
-            //1) Primary commited index = 5 / Idle1 = 4 / Idle2 = 4
-            //2) Switch Primary --> Primary (Idle1) commited needs to jump by 1 (index 5) and update the log (Do this where we set primary ID)
-            //2) Idle1(FormerPrimary) will do nothing when replication request is called on update from
-            //Current Primary (Former Idle1) as it is up to date
-            //2) Idle2 will update accordingly as Primary instructs with commit at index 5.
-            ///REFER TO THIS FOR IMPLEMENTING PRIMARY SWITCH            ///REFER TO THIS FOR IMPLEMENTING PRIMARY SWITCH            ///REFER TO THIS FOR IMPLEMENTING PRIMARY SWITCH
+
             if (passedCommitedIndex > -1) {
 
                 customer_record[smr_log[passedCommitedIndex].arg1] = smr_log[passedCommitedIndex].arg2;
@@ -164,17 +162,12 @@ void RobotFactory::AdminThread(int id) {
 	while (true) {
 		ul.lock();
 
-//        if (smr_log.size() - committed_index > 1 && committed_index != -1) {
-////            std::cout << "HERE HELLO HERE @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@" << std::endl;
-//        }
-
 		if (adminRequestQueue.empty()) {
 			admin_req_cv.wait(ul, [this]{ return !adminRequestQueue.empty(); }); //Can be triggered when thread is waked up.
 		}
 
 		auto adminRequest = std::move(adminRequestQueue.front());
 		adminRequestQueue.pop();
-
 
         if (last_index > committed_index && committed_index != -1) { //This logic is to handle if a Idle Factory becomes a Primary Factory.
             committed_index = last_index;
@@ -198,12 +191,18 @@ void RobotFactory::AdminThread(int id) {
 
         ReplicationRequest request_to_send;
         request_to_send.SetRequest(factory_id, committed_index, last_index, customerRequestLog.opcode, customerRequestLog.arg1, customerRequestLog.arg2);
-
+        int server_client_socket_status = -1;
         for (int i = 0; i < peers; i++) {
+//            std::cout << "Server trying to connect to " << portVector[i] << std::endl;
             ServerClientStub server_client_stub;
-            server_client_stub.Init(ipAddressVector[i], portVector[i]);
-            server_client_stub.PFAInitialAcknowledgement();
-            server_client_stub.ReplicationRequestSendRec(request_to_send);
+            server_client_socket_status = server_client_stub.Init(ipAddressVector[i], portVector[i]);
+            if (server_client_socket_status != -1) {
+                server_client_stub.PFAInitialAcknowledgement();
+                server_client_stub.ReplicationRequestSendRec(request_to_send);
+                server_client_stub.closeSocket();
+            } else {
+                server_client_stub.closeSocket(); //Maybe add this after ReplicationREquestSendREc call above. We can close the socket in either if/else scenario after it has been used or can't be used at all.
+            }
         }
 
 

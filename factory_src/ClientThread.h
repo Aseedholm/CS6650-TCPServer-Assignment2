@@ -4,6 +4,7 @@
 #include <chrono>
 #include <ctime>
 #include <string>
+#include <thread>
 
 #include "ClientStub.h"
 #include "ClientTimer.h"

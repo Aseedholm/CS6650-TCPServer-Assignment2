@@ -80,6 +80,8 @@ int main(int argc, char *argv[]) {
 	for (auto& cls : client_vector) {
 		timer.Merge(cls->GetTimer());
 	}
+	std::cout << "*****************************************************************" << std::endl;
+	std::cout << "Request Type: " << robot_type << std::endl;
 	timer.PrintStats();
 
 	return 1;

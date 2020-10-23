@@ -16,6 +16,7 @@ ServerSocket::ServerSocket(int fd, bool nagle_on) {
 }
 
 bool ServerSocket::Init(int port) {
+    socketStatus = 1;
 	if (is_initialized_) {
 		return true;
 	}
@@ -24,6 +25,7 @@ bool ServerSocket::Init(int port) {
 	fd_ = socket(AF_INET, SOCK_STREAM, 0);
 	if (fd_ < 0) {
 		perror("ERROR: failed to create a socket");
+		socketStatus = -1;
 		return false;
 	}
 
@@ -34,12 +36,15 @@ bool ServerSocket::Init(int port) {
 
 	if ((bind(fd_, (struct sockaddr *) &addr, sizeof(addr))) < 0) {
 		perror("ERROR: failed to bind");
+		socketStatus = -1;
+//		shutdown(fd_, SHUT_RDWR);
 		return false;
 	}
 
 	listen(fd_, 8);
 
 	is_initialized_ = true;
+	socketStatus = 1;
 	return true;
 }
 
@@ -54,4 +59,8 @@ std::unique_ptr<ServerSocket> ServerSocket::Accept() {
 	}
 
 	return std::unique_ptr<ServerSocket>(new ServerSocket(accepted_fd, IsNagleOn()));
+}
+
+int ServerSocket::getSocketStatus() {
+    return socketStatus;
 }

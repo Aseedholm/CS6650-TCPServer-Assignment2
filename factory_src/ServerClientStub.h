@@ -17,6 +17,7 @@ public:
 	int Init(std::string ip, int port);
     ReplicationRequest ReplicationRequestSendRec(ReplicationRequest replication_request);
     void PFAInitialAcknowledgement();
+    void closeSocket();
 };
 
 

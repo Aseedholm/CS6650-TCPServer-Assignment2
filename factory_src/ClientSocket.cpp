@@ -15,7 +15,7 @@ int ClientSocket::Init(std::string ip, int port) {
 	fd_ = socket(AF_INET, SOCK_STREAM, 0);
 	if (fd_ < 0) {
 		perror("ERROR: failed to create a socket");
-		return 0;
+		return -1;
 	}
 
 	memset(&addr, '\0', sizeof(addr));
@@ -25,7 +25,7 @@ int ClientSocket::Init(std::string ip, int port) {
 
 	if ((connect(fd_, (struct sockaddr *) &addr, sizeof(addr))) < 0) {
 		perror("ERROR: failed to connect");
-		return 0;
+		return -1;
 	}
 	is_initialized_ = true;
 	return 1;
