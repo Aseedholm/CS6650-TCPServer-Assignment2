@@ -44,6 +44,7 @@ private:
 	std::map<int, int> customer_record;
 	std::vector<MapOp> smr_log;
 
+
 	int last_index;
 	int committed_index;
 	int primary_id;
@@ -53,7 +54,9 @@ private:
 	std::vector<int> portVector;
 	std::vector<std::string> ipAddressVector;
 
-	bool notWriting = false;
+//	std::vector<std::unique_ptr<int>> pfaToIfa;
+
+//	bool notWriting = false;
 	int peers;
 
 //	RobotInfo CreateRegularRobot(RobotOrder order, int engineer_id);

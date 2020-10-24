@@ -54,6 +54,9 @@ ReplicationRequest ServerStub::ReceiveReplicationRequest() {
 	if (socket->Recv(buffer, replication_request.Size(), 0)) {
 		replication_request.Unmarshal(buffer);
 	}
+	else {
+        std::cout << "NOT RECEIVING IN SERVER STUB" << std::endl;
+	}
 	return replication_request;
 }
 

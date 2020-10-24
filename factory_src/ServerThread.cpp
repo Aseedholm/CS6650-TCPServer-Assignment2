@@ -131,6 +131,7 @@ void RobotFactory::EngineerThread(std::unique_ptr<ServerSocket> socket, int id) 
 
 
             ReplicationRequest replication_request = stub.ReceiveReplicationRequest();
+//            replication_request.Print();
             primary_id = replication_request.GetFactoryId();
 
             MapOp customerRequestLogFromPrimary;
@@ -152,6 +153,8 @@ void RobotFactory::EngineerThread(std::unique_ptr<ServerSocket> socket, int id) 
 
             committed_index = last_index - 1;
             stub.ReplicationResponse();
+    } else {
+        primary_id = -1;
     }
 
 }
@@ -192,15 +195,20 @@ void RobotFactory::AdminThread(int id) {
         ReplicationRequest request_to_send;
         request_to_send.SetRequest(factory_id, committed_index, last_index, customerRequestLog.opcode, customerRequestLog.arg1, customerRequestLog.arg2);
         int server_client_socket_status = -1;
+//        int returnedValue = 0;
+
+//        ServerClientStub server_client_stub;
         for (int i = 0; i < peers; i++) {
-//            std::cout << "Server trying to connect to " << portVector[i] << std::endl;
             ServerClientStub server_client_stub;
+
             server_client_socket_status = server_client_stub.Init(ipAddressVector[i], portVector[i]);
+//            std::cout << "AFTER CONNECTION ERROR THROWN BY SERVER CLIENT STUB \\ STATUS IS: " << server_client_socket_status << std::endl;
             if (server_client_socket_status != -1) {
                 server_client_stub.PFAInitialAcknowledgement();
                 server_client_stub.ReplicationRequestSendRec(request_to_send);
                 server_client_stub.closeSocket();
-            } else {
+            }
+            else {
                 server_client_stub.closeSocket(); //Maybe add this after ReplicationREquestSendREc call above. We can close the socket in either if/else scenario after it has been used or can't be used at all.
             }
         }
@@ -213,6 +221,7 @@ void RobotFactory::AdminThread(int id) {
 
         adminRequest->robot.SetAdminId(id);
 		adminRequest->prom.set_value(adminRequest->robot);
+//        std::cout << "End of Admin THread " << server_client_socket_status << std::endl;
 	}
 
 }

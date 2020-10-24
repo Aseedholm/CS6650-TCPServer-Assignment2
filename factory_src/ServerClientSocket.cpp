@@ -1,9 +1,11 @@
 #include <string.h>
+#include <iostream>
 #include <arpa/inet.h>
 #include <net/if.h>
 #include <netdb.h>
 #include <netinet/tcp.h>
 #include <sys/types.h>
+#include <errno.h>
 
 #include "ServerClientSocket.h"
 
@@ -24,8 +26,11 @@ int ServerClientSocket::Init(std::string ip, int port) {
 	addr.sin_port = htons(port);
 
 	if ((connect(fd_, (struct sockaddr *) &addr, sizeof(addr))) < 0) {
-		perror("ERROR: failed to connect");
-//		shutdown(fd_, SHUT_RDWR);
+		if(errno == ECONNREFUSED) {
+            std::cout << "ECONNREFUSED" << std::endl;
+            Close();
+		}
+//		perror("ERROR: failed to connect");
 		return -1;
 	}
 	is_initialized_ = true;

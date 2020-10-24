@@ -15,7 +15,8 @@ private:
 public:
 	ServerClientStub();
 	int Init(std::string ip, int port);
-    ReplicationRequest ReplicationRequestSendRec(ReplicationRequest replication_request);
+//    ReplicationRequest ReplicationRequestSendRec(ReplicationRequest replication_request);
+    int ReplicationRequestSendRec(ReplicationRequest replication_request);
     void PFAInitialAcknowledgement();
     void closeSocket();
 };
