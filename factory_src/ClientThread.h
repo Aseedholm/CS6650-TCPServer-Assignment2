@@ -13,6 +13,7 @@ class ClientThreadClass {
 	int customer_id;
 	int num_orders;
 //	int robot_type;
+    int stopSending;
     int request_type;
 	ClientStub stub;
 

@@ -26,10 +26,12 @@ int ServerClientSocket::Init(std::string ip, int port) {
 	addr.sin_port = htons(port);
 
 	if ((connect(fd_, (struct sockaddr *) &addr, sizeof(addr))) < 0) {
-		if(errno == ECONNREFUSED) {
-            std::cout << "ECONNREFUSED" << std::endl;
-            Close();
-		}
+//		if(errno == ECONNREFUSED) {
+//            std::cout << "ECONNREFUSED" << std::endl;
+//            Close();
+//		}
+
+        Close();
 //		perror("ERROR: failed to connect");
 		return -1;
 	}

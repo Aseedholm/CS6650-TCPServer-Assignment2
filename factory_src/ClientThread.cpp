@@ -38,6 +38,7 @@ void ClientThreadClass::ThreadBody(std::string ip, int port, int id, int orders,
             switch (request_type) {
                 case 1:
                     robot = stub.OrderRobot(request);
+
                     break;
                 case 3:
                     request.SetRequest(i, -1, request_type);
@@ -59,7 +60,8 @@ void ClientThreadClass::ThreadBody(std::string ip, int port, int id, int orders,
             timer.EndAndMerge();
 
             if ( (!robot.IsValid()) && request_type == 1) {
-                std::cout << "Invalid robot " << customer_id << std::endl;
+//                stopSending = -1;
+//                std::cout << "Invalid robot " << customer_id << std::endl;
                 break;
             }
         } //end for loop

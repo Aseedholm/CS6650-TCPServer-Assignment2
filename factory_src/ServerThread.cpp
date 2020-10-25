@@ -107,7 +107,9 @@ void RobotFactory::EngineerThread(std::unique_ptr<ServerSocket> socket, int id) 
                 case 1:
 
                     primary_id = factory_id;
-
+//                    if((int)pfaToIfa.size() != peers) {
+//                        setPFAToIFAConnections();
+//                    }
                     robot = CreateRobotWithAdmin(request, engineer_id);
 
                     stub.SendRobot(robot);
@@ -199,14 +201,20 @@ void RobotFactory::AdminThread(int id) {
 
 //        ServerClientStub server_client_stub;
         for (int i = 0; i < peers; i++) {
-            ServerClientStub server_client_stub;
+            ////
+//            pfaToIfa[i].PFAInitialAcknowledgement();
+//            pfaToIfa[i].ReplicationRequestSendRec(request_to_send);
+            ////
 
+            ServerClientStub server_client_stub;
+//
             server_client_socket_status = server_client_stub.Init(ipAddressVector[i], portVector[i]);
 //            std::cout << "AFTER CONNECTION ERROR THROWN BY SERVER CLIENT STUB \\ STATUS IS: " << server_client_socket_status << std::endl;
             if (server_client_socket_status != -1) {
                 server_client_stub.PFAInitialAcknowledgement();
                 server_client_stub.ReplicationRequestSendRec(request_to_send);
                 server_client_stub.closeSocket();
+
             }
             else {
                 server_client_stub.closeSocket(); //Maybe add this after ReplicationREquestSendREc call above. We can close the socket in either if/else scenario after it has been used or can't be used at all.
@@ -286,4 +294,15 @@ void RobotFactory::setFactoryId(int idPassed) {
 
 void RobotFactory::setCommitedIndex(int commitedIndexPassed) {
     committed_index = commitedIndexPassed;
+}
+
+void RobotFactory::setPFAToIFAConnections() {
+    pfaToIfa.resize(peers);
+    for (int i = 0; i < peers; i++) {
+        ServerClientStub server_client_stub;
+        server_client_stub.Init(ipAddressVector[i], portVector[i]);
+        pfaToIfa[i] = server_client_stub;
+        std::cout << "HERE " << i << std::endl;
+
+    }
 }

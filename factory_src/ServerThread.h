@@ -54,7 +54,8 @@ private:
 	std::vector<int> portVector;
 	std::vector<std::string> ipAddressVector;
 
-//	std::vector<std::unique_ptr<int>> pfaToIfa;
+	std::vector<std::unique_ptr<ServerClientStub>> pfaToIfaUnique;
+	std::vector<ServerClientStub> pfaToIfa;
 
 //	bool notWriting = false;
 	int peers;
@@ -75,6 +76,7 @@ public:
 	void setPrimaryId(int idPassed);
 	void setFactoryId(int idPassed);
 	void setCommitedIndex(int commitedIndexPassed);
+	void setPFAToIFAConnections();
 };
 
 #endif // end of #ifndef __SERVERTHREAD_H__
