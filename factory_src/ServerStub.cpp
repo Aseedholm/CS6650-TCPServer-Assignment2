@@ -37,16 +37,63 @@ int ServerStub::ReturnRecord(CustomerRecord record) {
 	return socket->Send(buffer, record.Size(), 0);
 }
 
-int ServerStub::initialAcknowledgementReceived() {
+//int ServerStub::initialAcknowledgementReceived() {
+//    char buffer[4];
+//    int net_acknowledgement;
+//    int sentAcknowledgement = -1;
+//	if (socket->Recv(buffer, sizeof(int), 0)) {
+//        memcpy(&net_acknowledgement, buffer, sizeof(net_acknowledgement));
+//        sentAcknowledgement = ntohl(net_acknowledgement);
+//	}
+//	return sentAcknowledgement;
+//}
+
+int ServerStub::initialAcknowledgementReceived(int committed_index) {
     char buffer[4];
     int net_acknowledgement;
     int sentAcknowledgement = -1;
 	if (socket->Recv(buffer, sizeof(int), 0)) {
         memcpy(&net_acknowledgement, buffer, sizeof(net_acknowledgement));
         sentAcknowledgement = ntohl(net_acknowledgement);
+        //if we are connected to PFA
+        if(sentAcknowledgement == 1) {
+            char indexBuffer[4];
+            int net_committed_index = htonl(committed_index);
+            memcpy(indexBuffer, &net_committed_index, sizeof(net_committed_index));
+            int size = sizeof(committed_index);
+            if(socket->Send(indexBuffer, size, 0) == 0) {
+//                std::cout << "Issue sending committed index from Server" << std::endl;
+            }
+        }
 	}
 	return sentAcknowledgement;
 }
+
+//int ServerStub::initialAcknowledgementReceived(int committed_index, int idleId) {
+//    char buffer[4];
+//    int net_acknowledgement;
+//    int sentAcknowledgement = -1;
+//	if (socket->Recv(buffer, sizeof(int), 0)) {
+//        memcpy(&net_acknowledgement, buffer, sizeof(net_acknowledgement));
+//        sentAcknowledgement = ntohl(net_acknowledgement);
+//        //if we are connected to PFA
+//        if(sentAcknowledgement == 1) {
+//            char indexBuffer[8];
+//            int net_committed_index = htonl(committed_index);
+//            int net_idle_factory_id = htonl(idleId);
+//            int offset = 0;
+//            memcpy(indexBuffer + offset, &net_committed_index, sizeof(net_committed_index));
+//            offset += sizeof(net_committed_index);
+//            memcpy(indexBuffer + offset, &net_idle_factory_id, sizeof(net_idle_factory_id));
+////            memcpy(indexBuffer, &net_committed_index, sizeof(net_committed_index));
+//            int size = sizeof(committed_index) + sizeof(idleId);
+//            if(socket->Send(indexBuffer, size, 0) == 0) {
+//                std::cout << "Issue sending committed index from Server" << std::endl;
+//            }
+//        }
+//	}
+//	return sentAcknowledgement;
+//}
 
 ReplicationRequest ServerStub::ReceiveReplicationRequest() {
     char buffer[32];
@@ -55,9 +102,11 @@ ReplicationRequest ServerStub::ReceiveReplicationRequest() {
 		replication_request.Unmarshal(buffer);
 	}
 	else {
-        std::cout << "NOT RECEIVING IN SERVER STUB" << std::endl;
+//        std::cout << "NOT RECEIVING IN SERVER STUB" << std::endl;
+        replication_request.SetRequest(-1, -1, -1, -1, -1, -1);
 	}
-	return replication_request;
+
+;	return replication_request;
 }
 
 
@@ -68,7 +117,7 @@ void ServerStub::ReplicationResponse() {
     memcpy(buffer, &net_replication_complete, sizeof(net_replication_complete));
     int size = sizeof(replicationComplete);
     if(socket->Send(buffer, size, 0) == 0) {
-        std::cout << "Issue sending replication response message" << std::endl;
+//        std::cout << "Issue sending replication response message" << std::endl;
     }
 }
 

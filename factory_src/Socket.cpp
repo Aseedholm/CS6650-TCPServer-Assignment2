@@ -36,7 +36,7 @@ int Socket::Send(char *buffer, int size, int flags) { ///MARSHALLS SOME DATA AND
 				continue;
 			}
 			*/
-			perror("ERROR: failed to send");
+//			perror("ERROR: failed to send");
 			Close();
 			return 0;
 		}

@@ -22,8 +22,9 @@ public:
 
 	int ReturnRecord(CustomerRecord record);
 
-    int initialAcknowledgementReceived();
-
+//    int initialAcknowledgementReceived();
+    int initialAcknowledgementReceived(int committed_index);
+//    int initialAcknowledgementReceived(int committed_index, int idleId);
     ReplicationRequest ReceiveReplicationRequest();
 
     void ReplicationResponse();

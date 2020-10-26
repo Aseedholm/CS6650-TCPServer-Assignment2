@@ -83,13 +83,8 @@ void RobotFactory::EngineerThread(std::unique_ptr<ServerSocket> socket, int id) 
 	ServerStub stub;
 
 	stub.Init(std::move(socket));
-//    int returnedInitValue = stub.Init(std::move(socket));
-//    std::cout << "STUB IN ENG/IFA THREAD's VALUE: " << returnedInitValue << std::endl;
-//    if (returnedInitValue < 0) {
-//        std::cout << "*******************************************************THIS IS WHERE WE'D CANCEL IFA*******************************************************" << std::endl;
-//    }
 
-	int returnedAcknowledgement = stub.initialAcknowledgementReceived();
+	int returnedAcknowledgement = stub.initialAcknowledgementReceived(committed_index);
 
     if(returnedAcknowledgement == 0) { //Engineer connected to client
         while (true) {
@@ -107,9 +102,7 @@ void RobotFactory::EngineerThread(std::unique_ptr<ServerSocket> socket, int id) 
                 case 1:
 
                     primary_id = factory_id;
-//                    if((int)pfaToIfa.size() != peers) {
-//                        setPFAToIFAConnections();
-//                    }
+
                     robot = CreateRobotWithAdmin(request, engineer_id);
 
                     stub.SendRobot(robot);
@@ -196,22 +189,35 @@ void RobotFactory::AdminThread(int id) {
 
         ReplicationRequest request_to_send;
         request_to_send.SetRequest(factory_id, committed_index, last_index, customerRequestLog.opcode, customerRequestLog.arg1, customerRequestLog.arg2);
-        int server_client_socket_status = -1;
-//        int returnedValue = 0;
 
-//        ServerClientStub server_client_stub;
+        int server_client_socket_status = -1;
+        int  passed_committed_index = -1;
+
+//        idleFactory factory_idle;
         for (int i = 0; i < peers; i++) {
-            ////
-//            pfaToIfa[i].PFAInitialAcknowledgement();
-//            pfaToIfa[i].ReplicationRequestSendRec(request_to_send);
-            ////
 
             ServerClientStub server_client_stub;
 //
             server_client_socket_status = server_client_stub.Init(ipAddressVector[i], portVector[i]);
-//            std::cout << "AFTER CONNECTION ERROR THROWN BY SERVER CLIENT STUB \\ STATUS IS: " << server_client_socket_status << std::endl;
             if (server_client_socket_status != -1) {
-                server_client_stub.PFAInitialAcknowledgement();
+                passed_committed_index = server_client_stub.PFAInitialAcknowledgement();
+
+                if ((committed_index - passed_committed_index > 1) && committed_index != -1) {
+
+
+                    for(int j = 0; j < (int)smr_log.size(); j+=1) {
+                        if(j != 0) {
+                            ServerClientStub server_client_stub;
+                            server_client_socket_status = server_client_stub.Init(ipAddressVector[i], portVector[i]);
+                            server_client_stub.PFAInitialAcknowledgement();
+                        }
+                        ReplicationRequest replication_catch_up_request;
+                        replication_catch_up_request.SetRequest(factory_id, j, j + 1, smr_log[j].opcode, smr_log[j].arg1, smr_log[j].arg2);
+                        server_client_stub.ReplicationRequestSendRec(replication_catch_up_request);
+                        server_client_stub.closeSocket();
+                    }
+                    passed_committed_index = server_client_stub.PFAInitialAcknowledgement();
+                }
                 server_client_stub.ReplicationRequestSendRec(request_to_send);
                 server_client_stub.closeSocket();
 
@@ -229,7 +235,6 @@ void RobotFactory::AdminThread(int id) {
 
         adminRequest->robot.SetAdminId(id);
 		adminRequest->prom.set_value(adminRequest->robot);
-//        std::cout << "End of Admin THread " << server_client_socket_status << std::endl;
 	}
 
 }

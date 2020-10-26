@@ -3,6 +3,13 @@
 
 #include <string>
 
+//////////
+//struct idleFactory {
+//    int committed_index_passed;
+//    int idle_factory_id;
+//};
+/////////
+
 class RobotOrder {
 private:
 	int customer_id;
