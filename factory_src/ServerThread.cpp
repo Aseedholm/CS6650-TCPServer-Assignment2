@@ -68,7 +68,7 @@ RobotInfo RobotFactory::CreateRobotWithAdmin(CustomerRequest request, int engine
 }
 
 void RobotFactory::EngineerThread(std::unique_ptr<ServerSocket> socket, int id) {
-
+//    setPFAToIFAConnections();
 	int engineer_id = id;
 
 
@@ -126,7 +126,6 @@ void RobotFactory::EngineerThread(std::unique_ptr<ServerSocket> socket, int id) 
 
 
             ReplicationRequest replication_request = stub.ReceiveReplicationRequest();
-//            replication_request.Print();
             primary_id = replication_request.GetFactoryId();
 
             MapOp customerRequestLogFromPrimary;
@@ -193,19 +192,18 @@ void RobotFactory::AdminThread(int id) {
         int server_client_socket_status = -1;
         int  passed_committed_index = -1;
 
-//        idleFactory factory_idle;
-        for (int i = 0; i < peers; i++) {
+        for (int i = 0; i < peers; i++) { //replication for loop.
 
             ServerClientStub server_client_stub;
-//
             server_client_socket_status = server_client_stub.Init(ipAddressVector[i], portVector[i]);
+
             if (server_client_socket_status != -1) {
                 passed_committed_index = server_client_stub.PFAInitialAcknowledgement();
 
-                if ((committed_index - passed_committed_index > 1) && committed_index != -1) {
+                if ((committed_index - passed_committed_index > 1) && committed_index != -1) { //catch up if statement for failed server.
 
 
-                    for(int j = 0; j < (int)smr_log.size(); j+=1) {
+                    for(int j = 0; j < (int)smr_log.size(); j+=1) { //for loop for catch up for failed server.
                         if(j != 0) {
                             ServerClientStub server_client_stub;
                             server_client_socket_status = server_client_stub.Init(ipAddressVector[i], portVector[i]);
@@ -269,8 +267,6 @@ CustomerRecord RobotFactory::GetCustomerRecord(CustomerRequest request) {
     admin_req_lock.lock(); //MAKE A NEW LOCK
     if (customer_record.count(customer_id_return) > 0) {
 
-        //Add wait with mutex lock based on true/false state of adminWriting boolean. If false then wait, if true
-
         int last_order_return = customer_record.find(customer_id_return)->second;
         recordToReturn.setCustomerInformation(customer_id_return, last_order_return);
 
@@ -302,12 +298,9 @@ void RobotFactory::setCommitedIndex(int commitedIndexPassed) {
 }
 
 void RobotFactory::setPFAToIFAConnections() {
-    pfaToIfa.resize(peers);
     for (int i = 0; i < peers; i++) {
         ServerClientStub server_client_stub;
         server_client_stub.Init(ipAddressVector[i], portVector[i]);
-        pfaToIfa[i] = server_client_stub;
-        std::cout << "HERE " << i << std::endl;
-
+        pfaToIfa.push_back(std::move(server_client_stub));
     }
 }

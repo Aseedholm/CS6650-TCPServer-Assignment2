@@ -54,14 +54,10 @@ private:
 	std::vector<int> portVector;
 	std::vector<std::string> ipAddressVector;
 
-	std::vector<std::unique_ptr<ServerClientStub>> pfaToIfaUnique;
 	std::vector<ServerClientStub> pfaToIfa;
 
-//	bool notWriting = false;
 	int peers;
 
-//	RobotInfo CreateRegularRobot(RobotOrder order, int engineer_id);
-//	RobotInfo CreateSpecialRobot(RobotOrder order, int engineer_id);
 	RobotInfo CreateRegularRobot(CustomerRequest request, int engineer_id);
 	RobotInfo CreateSpecialRobot(CustomerRequest request, int engineer_id);
     RobotInfo CreateRobotWithAdmin(CustomerRequest request, int engineer_id);

@@ -15,18 +15,6 @@ void ClientThreadClass::ThreadBody(std::string ip, int port, int id, int orders,
 	}
 	stub.InitialAcknowledgement(); //Send server a message saying it is the client connecting. **************
 
-	if (request_type == 2) {
-        CustomerRequest request;
-
-		RobotInfo robot;
-		CustomerRecord record;
-        request.SetRequest(customer_id, -1, request_type);
-
-        record = stub.ReadRecord(request);
-        record.Print();
-	} else if(request_type == 1 || request_type == 3){
-
-
         for (int i = 0; i < num_orders; i++) {
             CustomerRequest request;
 
@@ -39,6 +27,15 @@ void ClientThreadClass::ThreadBody(std::string ip, int port, int id, int orders,
                 case 1:
                     robot = stub.OrderRobot(request);
 
+                    break;
+
+                case 2:
+                    request.SetRequest(i, -1, request_type);
+
+                    record = stub.ReadRecord(request);
+//                    if (record.getCustomerId() != -1) {
+//                        record.Print();
+//                    }
                     break;
                 case 3:
                     request.SetRequest(i, -1, request_type);
@@ -65,7 +62,6 @@ void ClientThreadClass::ThreadBody(std::string ip, int port, int id, int orders,
                 break;
             }
         } //end for loop
-	} // END OF ELSE FOR IF request_type == 2
 }
 
 ClientTimer ClientThreadClass::GetTimer() {
